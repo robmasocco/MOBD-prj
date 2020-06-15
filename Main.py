@@ -17,6 +17,7 @@ from SVM import svm_param_selection
 
 target = 'CLASS'
 
+
 def main():
     # Read dataset
     dataset_path = './training_set.csv'

@@ -14,14 +14,15 @@ from sklearn import svm
 def svm_param_selection(train_x, train_y, n_folds, metric):
 
     # griglia degli iperparametri
-    param_grid = [{'kernel': ['linear'], 'C': [0.1, 1, 10]},
-                  {'kernel': ['poly'], 'C': [0.1, 1, 10], 'degree': [2, 3, 4]},
-                  {'kernel': ['rbf'], 'C': [0.1, 1, 10], 'gamma': [1e-3, 1e-4]}]
+    param_grid = [{'kernel': ['rbf'], 'C': [0.1, 0.5, 1, 5, 10, 100], 'gamma': [1, 0.1, 0.5]},
+                  #{'kernel': ['linear'], 'C': [0.1, 1, 10]},
+                  #{'kernel': ['linear'], 'C': [0.1, 1, 10]},
+                  {'kernel': ['poly'], 'C': [0.1, 0.5, 1, 5, 10], 'degree': [2]}]
 
     clf = model_select.GridSearchCV(svm.SVC(class_weight='balanced',
                                             decision_function_shape='ovo',
                                             probability=True,
-                                            cache_size=1000),
+                                            cache_size=3000),
                                     param_grid, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
     clf.fit(train_x, train_y)
 
