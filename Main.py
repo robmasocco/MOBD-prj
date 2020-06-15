@@ -1,8 +1,8 @@
 """
-    Author: Alessandro Tenaglia
-    Project: ProvaMOBD
+    Author: Alessandro Tenaglia, Roberto Masocco
+    Project: MOBD Classifier
     File: Main.py
-    Date created: 08/06/2020
+    Date created: 15/06/2020
     Description: 
     
 """
@@ -58,7 +58,7 @@ def main():
     train_mean = train_x.mean()
     train_x = train_x.fillna(train_mean)
     test_x = test_x.fillna(train_mean)
-    if get_na_count(train_x) != 0 | get_na_count(test_x) != 0:
+    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: missing values')
         return -1
 
@@ -77,7 +77,7 @@ def main():
     print('Test outliers: ', get_na_count(test_x))
     train_x = train_x.fillna(train_mean)
     test_x = test_x.fillna(train_mean)
-    if get_na_count(train_x) != 0 | get_na_count(test_x != 0):
+    if get_na_count(train_x) != 0 or get_na_count(test_x != 0):
         print('Error: outliers')
         return -1
     sns.boxplot(data=train_x)
@@ -85,13 +85,14 @@ def main():
 
     # Scaling
     print('\nScaling')
-    scaler = prep.StandardScaler()
-    # scaler = prep.MinMaxScaler()
+    # scaler = prep.StandardScaler()
+    scaler = prep.MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(train_x)
     train_x = pd.DataFrame(scaler.transform(train_x))
     test_x = pd.DataFrame(scaler.transform(test_x))
     print('\nTraining set shape:', train_x.shape)
     train_x.columns = features_list
+    test_x.columns = features_list
     print(train_x.describe())
     sns.boxplot(data=train_x)
     plt.show()
