@@ -23,7 +23,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_poly = [{'kernel': ['linear'], 'C': np.arange(1, 10, 0.05)},
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
-    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(0.1, 5, 0.005), 'gamma': np.arange(0.1, 1, 0.005)}]
+    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(0.1, 4, 0.005), 'gamma': np.arange(0.1, 1, 0.005)}]
 
     clf = model_select.GridSearchCV(svm.SVC(class_weight=None,
                                             decision_function_shape='ovo',
