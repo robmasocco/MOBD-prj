@@ -13,7 +13,7 @@ import sklearn.model_selection as model_select
 import matplotlib.pyplot as plt
 
 from PreProcessing import *
-
+from SVM import svm_param_selection
 
 target = 'CLASS'
 
@@ -96,6 +96,15 @@ def main():
     print(train_x.describe())
     sns.boxplot(data=train_x)
     plt.show()
+
+    np_train_x = np.float64(train_x.values)
+    np_train_y = np.float64(train_y.values)
+    np_train_y = np_train_y.reshape((len(np_train_y), 1))
+    np_test_x = np.float64(test_x.values)
+    np_test_y = np.float64(test_y.values)
+    np_test_y = np_test_y.reshape((len(np_test_y), 1))
+
+    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
 
 
 if __name__ == '__main__':
