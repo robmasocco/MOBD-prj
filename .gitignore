@@ -1,0 +1,13 @@
+# Exclude PyCharm's project configuration directory.
+.idea/
+
+# Default PyCharm's .gitignore.
+/shelf/
+/workspace.xml
+
+# Datasource local storage ignored files.
+/dataSources/
+/dataSources.local.xml
+
+# Editor-based HTTP Client requests.
+/httpRequests/
