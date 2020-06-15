@@ -40,7 +40,7 @@ def main():
     print(pre_counts)
 
     # Split dataset in train set and test test
-    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=42, stratify=y)
+    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
@@ -53,8 +53,8 @@ def main():
 
     # Missing values
     print('\nMissing values')
-    print('Train nan: ', get_na_count(train_x))
-    print('Test nan: ', get_na_count(test_x))
+    print('Train nan: ', get_na_count_cols(train_x))
+    print('Test nan: ', get_na_count_cols(test_x))
     # train_x = train_x.dropna()
     # test_x = test_x.dropna()
     train_mean = train_x.mean()
@@ -71,10 +71,10 @@ def main():
     train_mean = train_x.mean()
     train_std = train_x.std()
     train_lower, train_upper = iqr_bounds(train_x)
-    train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
-    test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
-    # train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
-    # test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    #train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
+    #test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
+    train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     print('Train outliers: ', get_na_count(train_x))
     print('Test outliers: ', get_na_count(test_x))
     train_x = train_x.fillna(train_mean)
@@ -87,8 +87,8 @@ def main():
 
     # Scaling
     print('\nScaling')
-    # scaler = prep.StandardScaler()
-    scaler = prep.MinMaxScaler(feature_range=(-1, 1))
+    scaler = prep.StandardScaler()
+    #scaler = prep.MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(train_x)
     train_x = pd.DataFrame(scaler.transform(train_x))
     test_x = pd.DataFrame(scaler.transform(test_x))

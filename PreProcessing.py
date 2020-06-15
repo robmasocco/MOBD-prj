@@ -20,6 +20,12 @@ def get_na_count(df):
     return na_mask.sum().sum()
 
 
+# Count missing values for each features.
+def get_na_count_cols(df):
+    na_mask = df.isna()
+    return na_mask.sum(axis=0)
+
+
 # Compute IQR bounds
 def iqr_bounds(df):
     q1 = df.quantile(0.25)
