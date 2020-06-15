@@ -32,6 +32,9 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     print("Best parameters:\n")
     print(clf.best_params_)
 
+    # Print time required to refit on the whole training set.
+    print("\nTime to refit on training set: %f second(s)." % clf.refit_time_)
+
     # Print grid search results (avoiding I/O buffers destruction).
     if verbose:
         print("\nGrid scores:")
