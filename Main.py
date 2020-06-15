@@ -19,6 +19,11 @@ from SVM import svm_param_selection
 target = 'CLASS'
 
 
+"""
+The works.
+"""
+
+
 def main():
     # Read dataset
     dataset_path = './training_set.csv'
@@ -110,6 +115,11 @@ def main():
 
     evaluate_classifier(svm_classifier, test_x, test_y[target])
 
+    # Save cross-validation results locally if called from console.
+    if __name__ != '__main__':
+        return svm_classifier
 
+
+# Start the script.
 if __name__ == '__main__':
     main()

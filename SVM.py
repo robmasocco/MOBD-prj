@@ -12,7 +12,7 @@ from sklearn import svm
 import numpy as np
 
 
-def svm_param_selection(train_x, train_y, n_folds, metric):
+def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
 
     # griglia degli iperparametri
     param_grid = [{'kernel': ['rbf'], 'C': [0.5, 1, 2, 2.55, 2.5, 3, 5], 'gamma': [0.1, 0.08, 0.075, 0.09]}]
@@ -28,14 +28,16 @@ def svm_param_selection(train_x, train_y, n_folds, metric):
                                     param_grid, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
     clf.fit(train_x, train_y)
 
+    # Print best parameters.
     print("Best parameters:\n")
     print(clf.best_params_)
-    print("\nGrid scores:")
-    means = clf.cv_results_['mean_test_score']
-    stds = clf.cv_results_['std_test_score']
-    for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-        print("%0.4f (+/-%0.03f) for %r"
-              % (mean, std * 2, params))
-    print()
+
+    # Print grid search results (avoiding I/O buffers destruction).
+    if verbose:
+        print("\nGrid scores:")
+        means = clf.cv_results_['mean_test_score']
+        stds = clf.cv_results_['std_test_score']
+        for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+            print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
 
     return clf
