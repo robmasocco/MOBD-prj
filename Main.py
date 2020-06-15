@@ -12,6 +12,7 @@ import seaborn as sns
 import sklearn.model_selection as model_select
 import matplotlib.pyplot as plt
 
+from Evaluate import evaluate_classifier
 from PreProcessing import *
 from SVM import svm_param_selection
 
@@ -106,6 +107,8 @@ def main():
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
+
+    evaluate_classifier(svm_classifier, test_x, test_y)
 
 
 if __name__ == '__main__':
