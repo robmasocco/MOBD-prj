@@ -16,6 +16,7 @@ from Evaluate import evaluate_classifier
 from PreProcessing import *
 from SVM import svm_param_selection
 
+
 target = 'CLASS'
 
 
@@ -32,17 +33,25 @@ def main():
     print(dataset.describe())
     print('\n', dataset.tail())
 
+    # Analyze dataset classes proportions
+    pre_counts = dataset[target].value_counts()
+    sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
+    plt.show()
+    print('\nDataset classes proportions:')
+    print(pre_counts[2])
+
+    # Over sampling lercio
+    df_class_0 = dataset[dataset[target] == 0]
+    df_class_1 = dataset[dataset[target] == 1]
+    df_class_2 = dataset[dataset[target] == 2]
+    df_class_3 = dataset[dataset[target] == 3]
+    df_class_1 = df_class_1.sample(n=pre_counts[2], replace=True, random_state=0)
+    dataset = pd.concat([df_class_0, df_class_1, df_class_2, df_class_3], axis=0)
+
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
     y = dataset[[target]]
     features_list = x.columns.values.tolist()
-
-    # Analyze dataset classes proportions
-    pre_counts = y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
-    plt.show()
-    print('\nDataset classes proportions:')
-    print(pre_counts)
 
     # Split dataset in train set and test test
     train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
@@ -60,8 +69,6 @@ def main():
     print('\nMissing values')
     print('Train nan: ', get_na_count_cols(train_x))
     print('Test nan: ', get_na_count_cols(test_x))
-    # train_x = train_x.dropna()
-    # test_x = test_x.dropna()
     train_mean = train_x.mean()
     train_x = train_x.fillna(train_mean)
     test_x = test_x.fillna(train_mean)
@@ -76,8 +83,8 @@ def main():
     train_mean = train_x.mean()
     train_std = train_x.std()
     train_lower, train_upper = iqr_bounds(train_x)
-    #train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
-    #test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
+    # train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
+    # test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
     train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     print('Train outliers: ', get_na_count(train_x))
@@ -93,7 +100,7 @@ def main():
     # Scaling
     print('\nScaling')
     scaler = prep.StandardScaler()
-    #scaler = prep.MinMaxScaler(feature_range=(-1, 1))
+    # scaler = prep.MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(train_x)
     train_x = pd.DataFrame(scaler.transform(train_x))
     test_x = pd.DataFrame(scaler.transform(test_x))

@@ -15,4 +15,4 @@ def evaluate_classifier(classifier, test_x, test_y):
     confusion_matrix = metrics.confusion_matrix(test_y, pred_y)
     print(confusion_matrix)
     f1_score = metrics.f1_score(test_y, pred_y, average='macro')
-    print('F1: ', f1_score)
+    print('F1: %0.4f' % f1_score)
