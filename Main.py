@@ -108,7 +108,7 @@ def main():
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
 
-    evaluate_classifier(svm_classifier, test_x, test_y)
+    evaluate_classifier(svm_classifier, test_x, test_y[target])
 
 
 if __name__ == '__main__':
