@@ -17,7 +17,7 @@ from Evaluate import evaluate_classifier
 from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
 
-from imblearn.over_sampling import RandomOverSampler
+from imblearn.over_sampling import *
 
 
 target = 'CLASS'
@@ -93,7 +93,10 @@ def main():
     plt.show()
 
     # Training set balancing.
-    train_x, train_y = RandomOverSampler(random_state=0, sampling_strategy='minority').fit_resample(train_x, train_y[target])
+    #train_x, train_y = RandomOverSampler(random_state=0, sampling_strategy='minority').fit_resample(train_x, train_y[target])
+    #train_x, train_y = BorderlineSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority').fit_resample(train_x, train_y[target])
+    train_x, train_y = KMeansSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority', cluster_balance_threshold=0.25).fit_resample(train_x, train_y[target])
+    #train_x, train_y = SVMSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority').fit_resample(train_x, train_y[target])
     train_y = pd.DataFrame(train_y)
     train_y.columns = [target]
 
