@@ -12,6 +12,7 @@ import seaborn as sns
 import sklearn.model_selection as model_select
 from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
+from imblearn.under_sampling._prototype_selection import *
 
 from Classifiers.RandomForest import random_forest_param_selection
 from Evaluate import evaluate_classifier
@@ -37,7 +38,7 @@ def main():
     print('\n', dataset.tail())
 
     # Analyze dataset classes proportions
-    pre_counts = dataset[target].value_counts()
+    pre_counts = dataset[target].value_counts(normalize=True)
     sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
     plt.show()
     print('\nDataset classes proportions:')
@@ -62,14 +63,14 @@ def main():
 
     # Missing values
     print('\nMissing values')
-    print('Train nan: ', get_na_count_cols(train_x))
-    print('Test nan: ', get_na_count_cols(test_x))
+    print('Train nan: ', get_na_count(train_x))
+    print('Test nan: ', get_na_count(test_x))
     # train_mean = train_x.mean()
     # train_x = train_x.fillna(train_mean)
     # test_x = test_x.fillna(train_mean)
-    imputer = KNNImputer()
+    imputer = KNNImputer(n_neighbors=5)
     train_x = pd.DataFrame(imputer.fit_transform(train_x))
-    test_x = pd.DataFrame(imputer.fit_transform(test_x))
+    test_x = pd.DataFrame(imputer.transform(test_x))
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: missing values')
         return -1
@@ -78,29 +79,50 @@ def main():
     print('\nOutliers')
     sns.boxplot(data=train_x)
     plt.show()
+    # IQR
     train_lower, train_upper = iqr_bounds(train_x)
     train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
     test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
-    train_mean = train_x.mean()
-    train_std = train_x.std()
+    # Z Score
+    # train_mean = train_x.mean()
+    # train_std = train_x.std()
     # train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     # test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     print('Train outliers: ', get_na_count(train_x))
     print('Test outliers: ', get_na_count(test_x))
     train_x = pd.DataFrame(imputer.fit_transform(train_x))
-    test_x = pd.DataFrame(imputer.fit_transform(test_x))
-    if get_na_count(train_x) != 0 or get_na_count(test_x != 0):
+    test_x = pd.DataFrame(imputer.transform(test_x))
+    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: outliers')
         return -1
     sns.boxplot(data=train_x)
     plt.show()
 
+    # Analyze dataset classes proportions
+    post_counts = train_y[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
+    plt.show()
+    print('\nTraining set classes proportions:')
+    print(post_counts)
+
+    """"# Resampling
+    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
+    train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
+    train_y = pd.DataFrame(train_y)
+    train_y.columns = [target]
+
+    # Analyze dataset classes proportions
+    post_counts = train_y[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
+    plt.show()
+    print('\nTraining set classes proportions:')
+    print(post_counts)"""
+
     # Scaling
     print('\nScaling')
     scaler = prep.StandardScaler()
     # scaler = prep.MinMaxScaler(feature_range=(-1, 1))
-    scaler.fit(train_x)
-    train_x = pd.DataFrame(scaler.transform(train_x))
+    train_x = pd.DataFrame(scaler.fit_transform(train_x))
     test_x = pd.DataFrame(scaler.transform(test_x))
     print('\nTraining set shape:', train_x.shape)
     train_x.columns = features_list
@@ -109,17 +131,10 @@ def main():
     sns.boxplot(data=train_x)
     plt.show()
 
-    np_train_x = np.float64(train_x.values)
-    np_train_y = np.float64(train_y.values)
-    np_train_y = np_train_y.reshape((len(np_train_y), 1))
-    np_test_x = np.float64(test_x.values)
-    np_test_y = np.float64(test_y.values)
-    np_test_y = np_test_y.reshape((len(np_test_y), 1))
-
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
 
-    print("SVM GRID SEARCH")
+    print("\nSVM GRID SEARCH")
     evaluate_classifier(svm_classifier, test_x, test_y[target])
 
     # print("RANDOM FORESTS GRID SEARCH")
