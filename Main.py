@@ -12,6 +12,7 @@ import seaborn as sns
 import sklearn.model_selection as model_select
 import matplotlib.pyplot as plt
 
+from Classifiers.RandomForest import random_forest_param_selection
 from Evaluate import evaluate_classifier
 from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
@@ -118,13 +119,14 @@ def main():
     np_test_y = np.float64(test_y.values)
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
-    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
+    # svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
+    rf_classifier = random_forest_param_selection(train_x, train_y, n_folds=5, metric='f1_macro')
 
-    evaluate_classifier(svm_classifier, test_x, test_y[target])
+    evaluate_classifier(rf_classifier, test_x, test_y[target])
 
     # Save cross-validation results locally if called from console.
     if __name__ != '__main__':
-        return svm_classifier
+        return rf_classifier
 
 
 # Start the script.

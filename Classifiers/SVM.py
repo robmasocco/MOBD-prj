@@ -40,7 +40,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     print("\nTime to refit on training set: %f second(s)." % clf.refit_time_)
 
     # Print grid search results (avoiding I/O buffers destruction).
-    if True:
+    if verbose:
         print("\nGrid scores:")
         means = clf.cv_results_['mean_test_score']
         stds = clf.cv_results_['std_test_score']
