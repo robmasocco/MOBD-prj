@@ -23,13 +23,13 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_poly = [{'kernel': ['linear'], 'C': np.arange(1, 10, 0.05)},
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
-    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(0.1, 4, 0.005), 'gamma': np.arange(0.1, 1, 0.005)}]
+    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(2.25, 2.75, 0.05), 'gamma': np.arange(0.01, 0.1, 0.05)}]
     param_grid_tenny = [{'kernel': ['rbf'], 'C': [2.5], 'gamma': [0.05]}]
 
     clf = model_select.GridSearchCV(svm.SVC(class_weight='balanced',
                                             decision_function_shape='ovo',
                                             cache_size=3000),
-                                    param_grid_tenny, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
+                                    param_grid_rbf, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
     clf.fit(train_x, train_y)
 
     # Print best parameters.

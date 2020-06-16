@@ -119,14 +119,18 @@ def main():
     np_test_y = np.float64(test_y.values)
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
-    # svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
+    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
     rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
 
+    print("SVM GRID SEARCH")
     evaluate_classifier(rf_classifier, test_x, test_y[target])
+
+    print("RANDOM FORESTS GRID SEARCH")
+    evaluate_classifier(svm_classifier, test_x, test_y[target])
 
     # Save cross-validation results locally if called from console.
     if __name__ != '__main__':
-        return rf_classifier
+        return svm_classifier, rf_classifier
 
 
 # Start the script.
