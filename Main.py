@@ -10,9 +10,10 @@
 
 import seaborn as sns
 import sklearn.model_selection as model_select
+from imblearn.over_sampling import *
+from imblearn.under_sampling import *
 from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
-from imblearn.under_sampling._prototype_selection import *
 
 from Classifiers.RandomForest import random_forest_param_selection
 from Evaluate import evaluate_classifier
@@ -65,6 +66,7 @@ def main():
     print('\nMissing values')
     print('Train nan: ', get_na_count(train_x))
     print('Test nan: ', get_na_count(test_x))
+    # Mean
     # train_mean = train_x.mean()
     # train_x = train_x.fillna(train_mean)
     # test_x = test_x.fillna(train_mean)
@@ -98,26 +100,6 @@ def main():
     sns.boxplot(data=train_x)
     plt.show()
 
-    # Analyze dataset classes proportions
-    post_counts = train_y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
-    plt.show()
-    print('\nTraining set classes proportions:')
-    print(post_counts)
-
-    """"# Resampling
-    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
-    train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
-    train_y = pd.DataFrame(train_y)
-    train_y.columns = [target]
-
-    # Analyze dataset classes proportions
-    post_counts = train_y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
-    plt.show()
-    print('\nTraining set classes proportions:')
-    print(post_counts)"""
-
     # Scaling
     print('\nScaling')
     scaler = prep.StandardScaler()
@@ -130,6 +112,20 @@ def main():
     print(train_x.describe())
     sns.boxplot(data=train_x)
     plt.show()
+
+    # Resampling
+    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
+    # train_x, train_y = SVMSMOTE(sampling_strategy='auto', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
+    train_x, train_y = TomekLinks(sampling_strategy=[0], n_jobs=-1).fit_resample(train_x, train_y[target])
+    train_y = pd.DataFrame(train_y)
+    train_y.columns = [target]
+
+    # Analyze dataset classes proportions
+    post_counts = train_y[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
+    plt.show()
+    print('\nTraining set classes proportions:')
+    print(post_counts)
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
