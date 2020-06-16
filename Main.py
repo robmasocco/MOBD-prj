@@ -10,6 +10,7 @@
 
 import seaborn as sns
 import sklearn.model_selection as model_select
+from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
 
 from Classifiers.RandomForest import random_forest_param_selection
@@ -18,12 +19,13 @@ from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
 
 
-target = 'CLASS'
-
-
 """
 The works.
 """
+
+
+# Target columns with classes
+target = 'CLASS'
 
 
 def main():
@@ -40,14 +42,6 @@ def main():
     plt.show()
     print('\nDataset classes proportions:')
     print(pre_counts)
-
-    """# Over sampling lercio
-    df_class_0 = dataset[dataset[target] == 0]
-    df_class_1 = dataset[dataset[target] == 1]
-    df_class_2 = dataset[dataset[target] == 2]
-    df_class_3 = dataset[dataset[target] == 3]
-    df_class_1 = df_class_1.sample(n=pre_counts[2], replace=True, random_state=0)
-    dataset = pd.concat([df_class_0, df_class_1, df_class_2, df_class_3], axis=0)"""
 
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
@@ -70,9 +64,12 @@ def main():
     print('\nMissing values')
     print('Train nan: ', get_na_count_cols(train_x))
     print('Test nan: ', get_na_count_cols(test_x))
-    train_mean = train_x.mean()
-    train_x = train_x.fillna(train_mean)
-    test_x = test_x.fillna(train_mean)
+    # train_mean = train_x.mean()
+    # train_x = train_x.fillna(train_mean)
+    # test_x = test_x.fillna(train_mean)
+    imputer = KNNImputer()
+    train_x = pd.DataFrame(imputer.fit_transform(train_x))
+    test_x = pd.DataFrame(imputer.fit_transform(test_x))
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: missing values')
         return -1
@@ -81,17 +78,17 @@ def main():
     print('\nOutliers')
     sns.boxplot(data=train_x)
     plt.show()
+    train_lower, train_upper = iqr_bounds(train_x)
+    train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
+    test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
     train_mean = train_x.mean()
     train_std = train_x.std()
-    train_lower, train_upper = iqr_bounds(train_x)
-    # train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
-    # test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
-    train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
-    test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    # train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    # test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
     print('Train outliers: ', get_na_count(train_x))
     print('Test outliers: ', get_na_count(test_x))
-    train_x = train_x.fillna(train_mean)
-    test_x = test_x.fillna(train_mean)
+    train_x = pd.DataFrame(imputer.fit_transform(train_x))
+    test_x = pd.DataFrame(imputer.fit_transform(test_x))
     if get_na_count(train_x) != 0 or get_na_count(test_x != 0):
         print('Error: outliers')
         return -1
@@ -119,18 +116,18 @@ def main():
     np_test_y = np.float64(test_y.values)
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
-    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
-    rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
+    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
+    # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
 
     print("SVM GRID SEARCH")
-    evaluate_classifier(rf_classifier, test_x, test_y[target])
-
-    print("RANDOM FORESTS GRID SEARCH")
     evaluate_classifier(svm_classifier, test_x, test_y[target])
+
+    # print("RANDOM FORESTS GRID SEARCH")
+    # evaluate_classifier(rf_classifier, test_x, test_y[target])
 
     # Save cross-validation results locally if called from console.
     if __name__ != '__main__':
-        return svm_classifier, rf_classifier
+        return svm_classifier
 
 
 # Start the script.
