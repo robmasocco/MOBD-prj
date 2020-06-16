@@ -33,7 +33,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     clf.fit(train_x, train_y)
 
     # Print best parameters.
-    print("Best parameters:\n")
+    print("\nBest parameters:")
     print(clf.best_params_)
 
     # Print time required to refit on the whole training set.
