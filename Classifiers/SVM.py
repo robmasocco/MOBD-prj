@@ -10,6 +10,7 @@
 import sklearn.model_selection as model_select
 from sklearn import svm
 import numpy as np
+import pandas as pd
 
 
 def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
@@ -23,13 +24,13 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_poly = [{'kernel': ['linear'], 'C': np.arange(1, 10, 0.05)},
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
-    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(2.25, 2.75, 0.05), 'gamma': np.arange(0.01, 0.1, 0.05)}]
-    param_grid_tenny = [{'kernel': ['rbf'], 'C': [2.5], 'gamma': [0.05]}]
+    param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(1, 2, 0.05), 'gamma': np.arange(0.05, 0.15, 0.05), 'class_weight': ['balanced', None]}]
+    param_grid_tenny = [{'kernel': ['rbf'], 'C': [1.25], 'gamma': [0.07]}]
 
-    clf = model_select.GridSearchCV(svm.SVC(class_weight='balanced',
-                                            decision_function_shape='ovo',
+    clf = model_select.GridSearchCV(svm.SVC(decision_function_shape='ovo',
                                             cache_size=3000),
                                     param_grid_rbf, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
+
     clf.fit(train_x, train_y)
 
     # Print best parameters.
@@ -46,5 +47,4 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
         stds = clf.cv_results_['std_test_score']
         for mean, std, params in zip(means, stds, clf.cv_results_['params']):
             print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
-
     return clf

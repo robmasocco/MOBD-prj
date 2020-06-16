@@ -17,6 +17,8 @@ from Evaluate import evaluate_classifier
 from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
 
+from imblearn.over_sampling import RandomOverSampler
+
 
 target = 'CLASS'
 
@@ -40,14 +42,6 @@ def main():
     plt.show()
     print('\nDataset classes proportions:')
     print(pre_counts)
-
-    """# Over sampling lercio
-    df_class_0 = dataset[dataset[target] == 0]
-    df_class_1 = dataset[dataset[target] == 1]
-    df_class_2 = dataset[dataset[target] == 2]
-    df_class_3 = dataset[dataset[target] == 3]
-    df_class_1 = df_class_1.sample(n=pre_counts[2], replace=True, random_state=0)
-    dataset = pd.concat([df_class_0, df_class_1, df_class_2, df_class_3], axis=0)"""
 
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
@@ -98,6 +92,21 @@ def main():
     sns.boxplot(data=train_x)
     plt.show()
 
+    # Training set balancing.
+    train_x, train_y = RandomOverSampler(random_state=0,
+                             sampling_strategy='minority').fit_resample(train_x,
+                                                                        train_y[target])
+    train_y = pd.DataFrame(train_y)
+    train_y.columns = [target]
+
+    # Analyze dataset classes proportions after balancing.
+    post_counts = train_y[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=train_y).set(
+        title='Training set classes proportions (balanced)')
+    plt.show()
+    print('\nTraining set classes proportions (balanced):')
+    print(post_counts)
+
     # Scaling
     print('\nScaling')
     scaler = prep.StandardScaler()
@@ -119,14 +128,15 @@ def main():
     np_test_y = np.float64(test_y.values)
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
-    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro')
-    rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
+    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
+    #rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
 
     print("SVM GRID SEARCH")
-    evaluate_classifier(rf_classifier, test_x, test_y[target])
-
-    print("RANDOM FORESTS GRID SEARCH")
     evaluate_classifier(svm_classifier, test_x, test_y[target])
+
+    #print("RANDOM FORESTS GRID SEARCH")
+    #evaluate_classifier(rf_classifier, test_x, test_y[target])
+
 
     # Save cross-validation results locally if called from console.
     if __name__ != '__main__':
