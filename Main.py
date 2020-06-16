@@ -17,7 +17,7 @@ from Evaluate import evaluate_classifier
 from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
 
-from imblearn.over_sampling import *
+from imblearn.under_sampling._prototype_selection import *
 
 
 target = 'CLASS'
@@ -93,10 +93,11 @@ def main():
     plt.show()
 
     # Training set balancing.
-    #train_x, train_y = RandomOverSampler(random_state=0, sampling_strategy='minority').fit_resample(train_x, train_y[target])
-    #train_x, train_y = BorderlineSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority').fit_resample(train_x, train_y[target])
-    train_x, train_y = KMeansSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority', cluster_balance_threshold=0.25).fit_resample(train_x, train_y[target])
-    #train_x, train_y = SVMSMOTE(random_state=0, n_jobs=-1, sampling_strategy='minority').fit_resample(train_x, train_y[target])
+    #train_x, train_y = RandomUnderSampler(random_state=0, sampling_strategy='majority').fit_resample(train_x, train_y[target])
+    #train_x, train_y = NeighbourhoodCleaningRule(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
+    #train_x, train_y = AllKNN(sampling_strategy='majority', n_jobs=-1, allow_minority=True, n_neighbors=5, kind_sel='all').fit_resample(train_x, train_y[target])
+    #train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
+    train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
     train_y = pd.DataFrame(train_y)
     train_y.columns = [target]
 
