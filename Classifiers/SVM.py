@@ -24,7 +24,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_poly = [{'kernel': ['linear'], 'C': np.arange(1, 10, 0.05)},
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
-    param_grid_rbf = [{'kernel': ['rbf'], 'C': [1.67, 1.675, 1.665], 'gamma': [0.14, 0.135, 0.15]}]
+    param_grid_rbf = [{'kernel': ['rbf'], 'C': [1.67, 1.675, 2.5], 'gamma': [0.14, 0.05, 0.15]}]
     param_grid_tenny = [{'kernel': ['rbf'], 'C': [1.25], 'gamma': [0.07]}]
 
     # BEST WITH RANDOMOVERSAMPLER: C=1.67, gamma=0.14
