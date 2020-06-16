@@ -114,9 +114,9 @@ def main():
     plt.show()
 
     # Resampling
-    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
+    train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
     # train_x, train_y = SVMSMOTE(sampling_strategy='auto', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
-    train_x, train_y = TomekLinks(sampling_strategy=[0], n_jobs=-1).fit_resample(train_x, train_y[target])
+    # train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
     train_y = pd.DataFrame(train_y)
     train_y.columns = [target]
 
@@ -137,8 +137,8 @@ def main():
     # evaluate_classifier(rf_classifier, test_x, test_y[target])
 
     # Save cross-validation results locally if called from console.
-    if __name__ != '__main__':
-        return svm_classifier
+    # if __name__ != '__main__':
+    #   return rf_classifier
 
 
 # Start the script.

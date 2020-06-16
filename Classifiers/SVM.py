@@ -17,7 +17,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     # griglia degli iperparametri
     param_grid = [{'kernel': ['rbf'], 'C': [0.5, 1, 2, 2.55, 2.5, 3, 5], 'gamma': [0.1, 0.08, 0.075, 0.09]}]
                   # {'kernel': ['linear'], 'C': [0.1, 1, 10]},
-                  # {'kernel': ['poly'], 'C': [0.1, 0.5, 1, 5, 10], 'degree': [2, 3]}]
+                  # {'kernel': ['poly'], 'C': [10, 12, 15], 'degree': [2]}]
     param_grid_auto = [{'kernel': ['rbf'], 'C': np.arange(0.1, 5, 0.005), 'gamma': np.arange(0.1, 1, 0.005)},
                        {'kernel': ['linear'], 'C': np.arange(1, 10, 0.05)},
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
@@ -25,7 +25,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(2.25, 2.75, 0.05), 'gamma': np.arange(0.01, 0.1, 0.05)}]
 
-    param_grid_tenny = [{'kernel': ['rbf'], 'C': [1.25, 2.5], 'gamma': [0.05, 0.07], 'class_weight': [None, 'balanced']}]
+    param_grid_tenny = [{'kernel': ['rbf'], 'C': [2.75, 3], 'gamma': [0.05, 0.025], 'class_weight': [None, 'balanced']}]
 
     clf = model_select.GridSearchCV(svm.SVC(decision_function_shape='ovo',
                                             cache_size=3000),

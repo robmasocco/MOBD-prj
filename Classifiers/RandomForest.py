@@ -20,7 +20,7 @@ def random_forest_param_selection(train_x, train_y, n_folds, metric, features_li
     param_grid = {
         'criterion': ['gini', 'entropy'],
         'min_samples_leaf': [2, 3],
-        'n_estimators': [range(130, 140, 5)]
+        'n_estimators': [100, 150, 200]
     }
     # 2, 130, gini
 
