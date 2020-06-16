@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from Evaluate import evaluate_classifier
 from PreProcessing import *
-from SVM import svm_param_selection
+from Classifiers.SVM import svm_param_selection
 
 
 target = 'CLASS'
