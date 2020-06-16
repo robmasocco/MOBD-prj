@@ -38,15 +38,15 @@ def main():
     sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
     plt.show()
     print('\nDataset classes proportions:')
-    print(pre_counts[2])
+    print(pre_counts)
 
-    # Over sampling lercio
+    """# Over sampling lercio
     df_class_0 = dataset[dataset[target] == 0]
     df_class_1 = dataset[dataset[target] == 1]
     df_class_2 = dataset[dataset[target] == 2]
     df_class_3 = dataset[dataset[target] == 3]
     df_class_1 = df_class_1.sample(n=pre_counts[2], replace=True, random_state=0)
-    dataset = pd.concat([df_class_0, df_class_1, df_class_2, df_class_3], axis=0)
+    dataset = pd.concat([df_class_0, df_class_1, df_class_2, df_class_3], axis=0)"""
 
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
