@@ -15,7 +15,7 @@ from sklearn import svm
 import numpy as np
 
 
-def random_forest_param_selection(train_x, train_y, n_folds, metric):
+def random_forest_param_selection(train_x, train_y, n_folds, metric, features_list):
     # griglia degli iperparametri
     param_grid = {
         'criterion': ['gini', 'entropy'],
@@ -34,5 +34,10 @@ def random_forest_param_selection(train_x, train_y, n_folds, metric):
     stds = clf.cv_results_['std_test_score']
     for mean, std, params in zip(means, stds, clf.cv_results_['params']):
         print("%0.4f (+/-%0.03f) for %r\n" % (mean, std * 2, params))
+
+    importances = list(clf.best_estimator_.feature_importances_)
+    feature_importances = [(feature, round(importance, 2)) for feature, importance in zip(features_list, importances)]
+    feature_importances = sorted(feature_importances, key=lambda x: x[1], reverse=True)
+    [print('Variable: {:20} Importance: {}'.format(*pair)) for pair in feature_importances]
 
     return clf
