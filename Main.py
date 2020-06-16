@@ -49,7 +49,7 @@ def main():
     features_list = x.columns.values.tolist()
 
     # Split dataset in train set and test test
-    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
+    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=dataset['CLASS'])
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
@@ -93,11 +93,15 @@ def main():
     plt.show()
 
     # Training set balancing.
-    train_x, train_y = RandomOverSampler(random_state=0,
-                             sampling_strategy='minority').fit_resample(train_x,
-                                                                        train_y[target])
+    train_xp, train_yp = train_x, train_y  # TODO remove afterwards
+    train_x, train_y = RandomOverSampler(random_state=0, sampling_strategy='minority').fit_resample(train_x, train_y[target])
     train_y = pd.DataFrame(train_y)
     train_y.columns = [target]
+
+    # Other balancing strategy.
+    train_x2, train_y2 = RandomOverSampler(random_state=0, sampling_strategy='not majority').fit_resample(train_xp, train_yp[target])
+    train_y2 = pd.DataFrame(train_y2)
+    train_y2.columns = [target]
 
     # Analyze dataset classes proportions after balancing.
     post_counts = train_y[target].value_counts(normalize=True)
@@ -105,6 +109,14 @@ def main():
         title='Training set classes proportions (balanced)')
     plt.show()
     print('\nTraining set classes proportions (balanced):')
+    print(post_counts)
+
+    # Other balancing strategy analysis.
+    post_counts = train_y2[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=train_y2).set(
+        title='Training set classes proportions (balanced 2)')
+    plt.show()
+    print('\nTraining set classes proportions (balanced 2):')
     print(post_counts)
 
     # Scaling
@@ -129,10 +141,12 @@ def main():
     np_test_y = np_test_y.reshape((len(np_test_y), 1))
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
+    svm_classifier2 = svm_param_selection(train_x2, train_y2[target], n_folds=5, metric='f1_macro', verbose=True)
     #rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
 
     print("SVM GRID SEARCH")
     evaluate_classifier(svm_classifier, test_x, test_y[target])
+    evaluate_classifier(svm_classifier2, test_x, test_y[target])
 
     #print("RANDOM FORESTS GRID SEARCH")
     #evaluate_classifier(rf_classifier, test_x, test_y[target])
