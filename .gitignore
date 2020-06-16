@@ -11,3 +11,6 @@
 
 # Editor-based HTTP Client requests.
 /httpRequests/
+
+# Python VMs caches.
+/__pycache__
