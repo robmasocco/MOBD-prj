@@ -18,9 +18,9 @@ import numpy as np
 def random_forest_param_selection(train_x, train_y, n_folds, metric, features_list):
     # griglia degli iperparametri
     param_grid = {
-        'criterion': ['gini', 'entropy'],
-        'min_samples_leaf': [1, 2, 3],
-        'n_estimators': range(120, 140, 5)
+        'criterion': ['gini'],
+        'min_samples_leaf': [2],
+        'n_estimators': [130]
     }
     # 2, 130, gini
 
