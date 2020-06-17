@@ -31,6 +31,12 @@ target = 'CLASS'
 
 
 def main():
+    # pre = preprocessing(train)
+    # clf = addestramento(train)
+
+    # test = preprocessing(test)
+    # eval = evaluate(clf, test)
+
     # Read dataset
     dataset_path = './training_set.csv'
     dataset = pd.read_csv(dataset_path)
@@ -49,6 +55,8 @@ def main():
     x = dataset.drop(target, axis=1)
     y = dataset[[target]]
     features_list = x.columns.values.tolist()
+    print(dataset[target])
+    print(dataset[[target]])
 
     # Split dataset in train set and test test
     train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
@@ -119,9 +127,9 @@ def main():
     plt.show()
 
     # Resampling
-    train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
+    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
     # train_x, train_y = SVMSMOTE(sampling_strategy='auto', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
-    # train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
+    # train_x, train_y = TomekLinks(sampling_strategy=[0, 3], n_jobs=-1).fit_resample(train_x, train_y[target])
     train_y = pd.DataFrame(train_y)
     train_y.columns = [target]
 
