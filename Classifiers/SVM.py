@@ -25,7 +25,7 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(2.25, 2.75, 0.05), 'gamma': np.arange(0.01, 0.1, 0.05)}]
 
-    param_grid_tenny = [{'kernel': ['rbf'], 'C': [2.75, 3], 'gamma': [0.05, 0.025], 'class_weight': [None, 'balanced']}]
+    param_grid_tenny = [{'kernel': ['rbf'], 'C': [3], 'gamma': [0.05], 'class_weight': [None, 'balanced']}]
 
     clf = model_select.GridSearchCV(svm.SVC(decision_function_shape='ovo',
                                             cache_size=3000),

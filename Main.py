@@ -39,11 +39,11 @@ def main():
     print('\n', dataset.tail())
 
     # Analyze dataset classes proportions
-    pre_counts = dataset[target].value_counts(normalize=True)
+    data_counts = dataset[target].value_counts(normalize=True)
     sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
     plt.show()
     print('\nDataset classes proportions:')
-    print(pre_counts)
+    print(data_counts)
 
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
@@ -55,12 +55,17 @@ def main():
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
-    # Analyze dataset classes proportions
-    post_counts = train_y[target].value_counts(normalize=True)
+    # Analyze train and test classes proportions
+    train_counts = train_y[target].value_counts(normalize=True)
     sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
     plt.show()
     print('\nTraining set classes proportions:')
-    print(post_counts)
+    print(train_counts)
+    test_counts = test_y[target].value_counts(normalize=True)
+    sns.countplot(x=target, data=test_y).set(title='Test set classes proportions')
+    plt.show()
+    print('\nTest set classes proportions:')
+    print(test_counts)
 
     # Missing values
     print('\nMissing values')
@@ -70,7 +75,8 @@ def main():
     # train_mean = train_x.mean()
     # train_x = train_x.fillna(train_mean)
     # test_x = test_x.fillna(train_mean)
-    imputer = KNNImputer(n_neighbors=5)
+    # KNN
+    imputer = KNNImputer(n_neighbors=10)
     train_x = pd.DataFrame(imputer.fit_transform(train_x))
     test_x = pd.DataFrame(imputer.transform(test_x))
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
@@ -105,9 +111,8 @@ def main():
     scaler = prep.StandardScaler()
     # scaler = prep.MinMaxScaler(feature_range=(-1, 1))
     train_x = pd.DataFrame(scaler.fit_transform(train_x))
-    test_x = pd.DataFrame(scaler.transform(test_x))
-    print('\nTraining set shape:', train_x.shape)
     train_x.columns = features_list
+    test_x = pd.DataFrame(scaler.transform(test_x))
     test_x.columns = features_list
     print(train_x.describe())
     sns.boxplot(data=train_x)

@@ -30,5 +30,5 @@ def show_confusion_matrix(cm, f1_score):
     box_labels = [f"{v1}{v2}".strip() for v1, v2 in zip(group_counts, group_percentages)]
     box_labels = np.asarray(box_labels).reshape(cm.shape[0], cm.shape[1])
     sns.heatmap(cm, annot=box_labels, fmt="", cmap="YlGnBu", cbar=False, linewidths=1.0)\
-        .set(title='Confusion matrix', xlabel='F1 macro: %0.4f' % f1_score)
+        .set(title='Confusion matrix', xlabel='Predicted class\n\nF1 macro: %0.4f' % f1_score, ylabel='Actual class')
     plt.show()
