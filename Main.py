@@ -12,6 +12,7 @@ import seaborn as sns
 import sklearn.model_selection as model_select
 from imblearn.over_sampling import *
 from imblearn.under_sampling import *
+from sklearn.decomposition import PCA
 from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
 
@@ -140,6 +141,12 @@ def main():
     plt.show()
     print('\nTraining set classes proportions:')
     print(post_counts)
+
+    # Features selection
+    pca = PCA(n_components=12)
+    train_x = pca.fit_transform(train_x)
+    test_x = pca.transform(test_x)
+    print(pca.explained_variance_ratio_)
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
