@@ -50,7 +50,7 @@ def main():
         model_select.train_test_split(x, y,
                                       test_size=0.2,
                                       random_state=0,
-                                      tratify=y)
+                                      stratify=y)
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
