@@ -14,22 +14,21 @@ from sklearn.base import TransformerMixin
 from sklearn.impute import KNNImputer
 
 
-class KNNReplacerIQR(TransformerMixin):
+class KNNReplacerZS(TransformerMixin):
 
     def __init__(self, n_neighbors=2):
-        self.lower_bound = None
-        self.upper_bound = None
+        self.mean = None
+        self.std = None
         self.imputer = KNNImputer(n_neighbors=n_neighbors)
 
     def fit(self, x, y=None):
-        q1 = x.quantile(0.25)
-        q3 = x.quantile(0.75)
-        iqr = q3 - q1
-        self.lower_bound = q1 - (1.5 * iqr)
-        self.upper_bound = q3 + (1.5 * iqr)
-        self.imputer.fit(x.where(~((x < self.lower_bound) | (x > self.upper_bound)), np.nan))
+        x = pd.DataFrame(x)
+        self.mean = x.mean()
+        self.std = x.std()
+        self.imputer.fit(~(((x - self.mean) / self.std).abs() > 3), np.nan)
         return self
 
     def transform(self, x, y=None):
-        x.where(~((x < self.lower_bound) | (x > self.upper_bound)), np.nan, inplace=True)
+        x = pd.DataFrame(x)
+        x.where(~(((x - self.mean) / self.std).abs() > 3), np.nan, inplace=True)
         return self.imputer.transform(x)

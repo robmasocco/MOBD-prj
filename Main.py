@@ -8,22 +8,16 @@
 """
 
 
-import seaborn as sns
-import sklearn.model_selection as model_select
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
-from imblearn.over_sampling import *
-from imblearn.under_sampling import *
-from sklearn.decomposition import PCA, TruncatedSVD
-from sklearn.impute import KNNImputer
-import matplotlib.pyplot as plt
+import sklearn.model_selection as model_select
 
-from Classifiers.RandomForest import random_forest_param_selection
 from DataEvaluation import evaluate_classifier
 from DataPreparation import *
 from Classifiers.SVM import svm_param_selection
-from Classifiers.KNN import knn_param_selection
 from DataVisualization import *
-from KNNReplacerIQR import KNNReplacerIQR
+from Ouliers.KNNReplacerIQR import *
+
 
 """
 The works.
@@ -59,13 +53,7 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    """"# Make pipeline
-    pipeline = Pipeline([('nan_filler', KNNImputer()),
-                         ('outliners_replacer', ),
-                         ('scaler', prep.StandardScaler()),
-                         ('classifier', )
-                         ])"""
-
+    """
     # Missing values
     print('\nMissing values')
     print('Train nan: ', get_na_count(train_x))
@@ -81,14 +69,14 @@ def main():
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: missing values')
         return -1
-
+        
     # Outliers
     print('\nOutliers')
     show_boxplot_featrues(train_x, 'Test set features')
     # IQR
-    train_lower, train_upper = iqr_bounds(train_x)
-    train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
-    test_x.where(~((test_x < train_lower) | (test_x > train_upper)), np.nan, inplace=True)
+    replacer = KNNReplacerIQR(n_neighbors=10)
+    train_x = pd.DataFrame(replacer.fit_transform(train_x))
+    test_x = pd.DataFrame(replacer.transform(test_x))
     # Z Score
     # train_mean = train_x.mean()
     # train_std = train_x.std()
@@ -101,51 +89,62 @@ def main():
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: outliers')
         return -1
-    """replacer = KNNReplacerIQR(n_neighbors=10)
-    train_x = pd.DataFrame(replacer.fit_transform(train_x))
-    test_x = pd.DataFrame(replacer.transform(test_x))"""
     show_boxplot_featrues(train_x, 'Test set features')
-
+    
     # Scaling
     print('\nScaling')
     scaler = prep.StandardScaler()
-    # scaler = prep.MinMaxScaler(feature_range=(-1, 1))
     train_x = pd.DataFrame(scaler.fit_transform(train_x))
     train_x.columns = features_list
     test_x = pd.DataFrame(scaler.transform(test_x))
     test_x.columns = features_list
     print(train_x.describe())
     show_boxplot_featrues(train_x, 'Test set features')
+    """
 
-    # Resampling
-    # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
-    # train_x, train_y = SVMSMOTE(sampling_strategy='all', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
-    # train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
-    # train_y = pd.DataFrame(train_y)
-    # train_y.columns = [target]
+    # Make pipeline
+    pipeline = Pipeline([('imputer', KNNImputer()),
+                         ('replacer', KNNReplacerIQR()),
+                         ('scaler', prep.StandardScaler()),
+                         ('classifier', SVC(kernel='rbf',
+                                            decision_function_shape='ovo',
+                                            random_state=0,
+                                            cache_size=3000))
+                         ])
 
-    # Features selection
-    # pca = PCA(n_components=17)
-    # train_x = pca.fit_transform(train_x)
-    # test_x = pca.transform(test_x)
-    # print(pca.explained_variance_ratio_)
+    # Set the parameters
+    grid_pipeline = {'imputer__n_neighbors': [5],
+                     'replacer__n_neighbors': [5],
+                     'classifier__C': [2.75],
+                     'classifier__gamma': [0.05],
+                     'classifier__class_weight': [None, 'balanced']
+                     }
 
-    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
-    # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
-    # knn_classifier = knn_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
+    clf = model_select.GridSearchCV(pipeline, param_grid=grid_pipeline, scoring='f1_macro', cv=5, refit=True, n_jobs=-1)
+    clf.fit(train_x, train_y[target])
 
-    print("\nSVM GRID SEARCH")
-    evaluate_classifier(svm_classifier, test_x, test_y[target])
+    print("\nGrid scores:\n")
+    means = clf.cv_results_['mean_test_score']
+    stds = clf.cv_results_['std_test_score']
+    for mean, std, params in zip(means, stds, clf.cv_results_['params']):
+        print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
+    print("\nBest parameters:")
+    print(clf.best_params_)
 
-    # print("\nKNN GRID SEARCH")
-    # evaluate_classifier(knn_classifier, test_x, test_y[target])
+    evaluate_classifier(clf, test_x, test_y[target])
 
-    # print("RANDOM FORESTS GRID SEARCH")
-    # evaluate_classifier(svm_classifier, test_x, test_y[target])
+    imputer = KNNImputer(n_neighbors=clf.best_params_['imputer__n_neighbors'])
+    x = imputer.fit_transform(x)
+    replacer = KNNReplacerIQR(n_neighbors=clf.best_params_['replacer__n_neighbors'])
+    x = replacer.fit_transform(x)
+    scaler = prep.StandardScaler()
+    x = scaler.fit_transform(x)
 
-    # Save cross-validation results locally if called from console.
-    # if __name__ != '__main__':
-    #   return rf_classifier
+    best_clf = SVC(kernel='rbf', C=clf.best_params_['classifier__C'], gamma=clf.best_params_['classifier__gamma'],
+                   class_weight=clf.best_params_['classifier__class_weight'], decision_function_shape='ovo',
+                   random_state=0, cache_size=3000)
+    best_clf.fit(x, y[target])
+    evaluate_classifier(best_clf, x, y[target])
 
 
 # Start the script.
