@@ -14,7 +14,7 @@ import numpy as np
 
 def rad_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     # Hyperparameters grid to search.
-    param_grid_rad = [{'radius': [1.0, 0.5, 1.5, 2.0],
+    param_grid_rad = [{'radius': [20.0],
                        'algorithm': ['ball_tree', 'kd_tree', 'brute'],
                        'weights': ['uniform', 'distance'],
                        'p': [2, 1]}]
