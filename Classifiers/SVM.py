@@ -1,7 +1,7 @@
 """
-    Author: Alessandro Tenaglia
+    Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: SVM.py
+    File: Main.py
     Date created: 15/06/2020
     Description: 
     
@@ -25,9 +25,10 @@ def svm_param_selection(train_x, train_y, n_folds, metric, verbose=False):
                        {'kernel': ['poly'], 'C': np.arange(1, 10, 0.05), 'degree': [2, 3]}]
     param_grid_rbf = [{'kernel': ['rbf'], 'C': np.arange(2.25, 2.75, 0.05), 'gamma': np.arange(0.01, 0.1, 0.05)}]
 
-    param_grid_tenny = [{'kernel': ['rbf'], 'C': [3], 'gamma': [0.05], 'class_weight': [None, 'balanced']}]
+    param_grid_tenny = [{'kernel': ['rbf'], 'C': [3], 'gamma': [0.05], 'class_weight': [None]}]
 
     clf = model_select.GridSearchCV(svm.SVC(decision_function_shape='ovo',
+                                            random_state=0,
                                             cache_size=3000),
                                     param_grid_tenny, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
     clf.fit(train_x, train_y)

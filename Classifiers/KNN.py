@@ -1,8 +1,8 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: KNN.py
-    Date created: 17/06/2020
+    File: Main.py
+    Date created: 15/06/2020
     Description:
 
 """

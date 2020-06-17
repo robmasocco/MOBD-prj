@@ -1,6 +1,6 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
-    Project: MOBD Classifier
+    Project: MOBD-prj
     File: Main.py
     Date created: 15/06/2020
     Description: 
@@ -10,72 +10,61 @@
 
 import seaborn as sns
 import sklearn.model_selection as model_select
+from sklearn.pipeline import Pipeline
 from imblearn.over_sampling import *
 from imblearn.under_sampling import *
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.impute import KNNImputer
 import matplotlib.pyplot as plt
 
 from Classifiers.RandomForest import random_forest_param_selection
-from Evaluate import evaluate_classifier
-from PreProcessing import *
+from DataEvaluation import evaluate_classifier
+from DataPreparation import *
 from Classifiers.SVM import svm_param_selection
 from Classifiers.KNN import knn_param_selection
-
+from DataVisualization import *
+from KNNReplacerIQR import KNNReplacerIQR
 
 """
 The works.
 """
 
 
-# Target columns with classes
+# Target column
 target = 'CLASS'
 
 
 def main():
-    # pre = preprocessing(train)
-    # clf = addestramento(train)
-
-    # test = preprocessing(test)
-    # eval = evaluate(clf, test)
-
     # Read dataset
-    dataset_path = './training_set.csv'
+    dataset_path = 'Dataset/training_set.csv'
     dataset = pd.read_csv(dataset_path)
     print('\nDataset shape:', dataset.shape)
     print(dataset.describe())
     print('\n', dataset.tail())
 
-    # Analyze dataset classes proportions
-    data_counts = dataset[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=dataset).set(title='Dataset classes proportions')
-    plt.show()
-    print('\nDataset classes proportions:')
-    print(data_counts)
-
     # Separate features and target labels
     x = dataset.drop(target, axis=1)
     y = dataset[[target]]
     features_list = x.columns.values.tolist()
-    print(dataset[target])
-    print(dataset[[target]])
+
+    # Analyze dataset classes proportions
+    show_classes_proportions(y, 'Dataset classes proportions')
 
     # Split dataset in train set and test test
     train_x, test_x, train_y, test_y = model_select.train_test_split(x, y, test_size=0.2, random_state=0, stratify=y)
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
-    # Analyze train and test classes proportions
-    train_counts = train_y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
-    plt.show()
-    print('\nTraining set classes proportions:')
-    print(train_counts)
-    test_counts = test_y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=test_y).set(title='Test set classes proportions')
-    plt.show()
-    print('\nTest set classes proportions:')
-    print(test_counts)
+    # Analyze train set and test set classes proportions
+    show_classes_proportions(train_y, 'Training set classes proportions')
+    show_classes_proportions(test_y, 'Test set classes proportions')
+
+    """"# Make pipeline
+    pipeline = Pipeline([('nan_filler', KNNImputer()),
+                         ('outliners_replacer', ),
+                         ('scaler', prep.StandardScaler()),
+                         ('classifier', )
+                         ])"""
 
     # Missing values
     print('\nMissing values')
@@ -95,8 +84,7 @@ def main():
 
     # Outliers
     print('\nOutliers')
-    sns.boxplot(data=train_x)
-    plt.show()
+    show_boxplot_featrues(train_x, 'Test set features')
     # IQR
     train_lower, train_upper = iqr_bounds(train_x)
     train_x.where(~((train_x < train_lower) | (train_x > train_upper)), np.nan, inplace=True)
@@ -113,8 +101,10 @@ def main():
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: outliers')
         return -1
-    sns.boxplot(data=train_x)
-    plt.show()
+    """replacer = KNNReplacerIQR(n_neighbors=10)
+    train_x = pd.DataFrame(replacer.fit_transform(train_x))
+    test_x = pd.DataFrame(replacer.transform(test_x))"""
+    show_boxplot_featrues(train_x, 'Test set features')
 
     # Scaling
     print('\nScaling')
@@ -125,28 +115,20 @@ def main():
     test_x = pd.DataFrame(scaler.transform(test_x))
     test_x.columns = features_list
     print(train_x.describe())
-    sns.boxplot(data=train_x)
-    plt.show()
+    show_boxplot_featrues(train_x, 'Test set features')
 
     # Resampling
     # train_x, train_y = OneSidedSelection(sampling_strategy='majority', random_state=0).fit_resample(train_x, train_y[target])
     # train_x, train_y = SVMSMOTE(sampling_strategy='all', random_state=0, n_jobs=-1).fit_resample(train_x, train_y[target])
     # train_x, train_y = TomekLinks(sampling_strategy='majority', n_jobs=-1).fit_resample(train_x, train_y[target])
-    train_y = pd.DataFrame(train_y)
-    train_y.columns = [target]
-
-    # Analyze dataset classes proportions
-    post_counts = train_y[target].value_counts(normalize=True)
-    sns.countplot(x=target, data=train_y).set(title='Training set classes proportions')
-    plt.show()
-    print('\nTraining set classes proportions:')
-    print(post_counts)
+    # train_y = pd.DataFrame(train_y)
+    # train_y.columns = [target]
 
     # Features selection
-    pca = PCA(n_components=12)
-    train_x = pca.fit_transform(train_x)
-    test_x = pca.transform(test_x)
-    print(pca.explained_variance_ratio_)
+    # pca = PCA(n_components=17)
+    # train_x = pca.fit_transform(train_x)
+    # test_x = pca.transform(test_x)
+    # print(pca.explained_variance_ratio_)
 
     svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
@@ -159,7 +141,7 @@ def main():
     # evaluate_classifier(knn_classifier, test_x, test_y[target])
 
     # print("RANDOM FORESTS GRID SEARCH")
-    # evaluate_classifier(rf_classifier, test_x, test_y[target])
+    # evaluate_classifier(svm_classifier, test_x, test_y[target])
 
     # Save cross-validation results locally if called from console.
     # if __name__ != '__main__':

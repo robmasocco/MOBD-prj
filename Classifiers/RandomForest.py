@@ -1,8 +1,8 @@
 """
-    Author: Alessandro Tenaglia
+    Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: RandomForest.py
-    Date created: 16/06/2020
+    File: Main.py
+    Date created: 15/06/2020
     Description: 
     
 """
@@ -22,9 +22,17 @@ def random_forest_param_selection(train_x, train_y, n_folds, metric, features_li
         'min_samples_leaf': [2, 3],
         'n_estimators': [100, 150, 200]
     }
+    param_grid_tenny = {
+        "n_estimators": [100, 250, 500],
+        "criterion": ['gini', 'entropy'],
+        'class_weight': ['balanced'],
+        "max_features": ["auto", "sqrt", "log2"]
+    }
     # 2, 130, gini
 
-    clf = model_select.GridSearchCV(RandomForestClassifier(n_jobs=-1), param_grid, scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
+    clf = model_select.GridSearchCV(RandomForestClassifier(random_state=0, n_jobs=-1),
+                                    param_grid_tenny,
+                                    scoring=metric, cv=n_folds, refit=True, n_jobs=-1)
     clf.fit(train_x, train_y)
 
     print("Best parameters:")
