@@ -1,7 +1,7 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: SVM.py
+    File: KNN.py
     Date created: 17/06/2020
     Description:
 
@@ -9,7 +9,6 @@
 
 import sklearn.model_selection as model_select
 from sklearn.neighbors import KNeighborsClassifier
-import numpy as np
 
 
 def knn_param_selection(train_x, train_y, n_folds, metric, verbose=False):

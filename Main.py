@@ -141,15 +141,15 @@ def main():
     print('\nTraining set classes proportions:')
     print(post_counts)
 
-    # svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
+    svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
-    knn_classifier = knn_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
+    # knn_classifier = knn_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
 
-    print("\nKNN GRID SEARCH")
-    evaluate_classifier(knn_classifier, test_x, test_y[target])
+    print("\nSVM GRID SEARCH")
+    evaluate_classifier(svm_classifier, test_x, test_y[target])
 
-    # print("\nSVM GRID SEARCH")
-    # evaluate_classifier(svm_classifier, test_x, test_y[target])
+    # print("\nKNN GRID SEARCH")
+    # evaluate_classifier(knn_classifier, test_x, test_y[target])
 
     # print("RANDOM FORESTS GRID SEARCH")
     # evaluate_classifier(rf_classifier, test_x, test_y[target])
