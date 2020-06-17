@@ -20,6 +20,7 @@ from Evaluate import evaluate_classifier
 from PreProcessing import *
 from Classifiers.SVM import svm_param_selection
 from Classifiers.KNN import knn_param_selection
+from Classifiers.RadiusNeighbors import rad_param_selection
 
 
 """
@@ -143,10 +144,14 @@ def main():
 
     # svm_classifier = svm_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', verbose=True)
     # rf_classifier = random_forest_param_selection(train_x, train_y[target], n_folds=5, metric='f1_macro', features_list=features_list)
-    knn_classifier = knn_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
+    # knn_classifier = knn_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
+    rad_classifier = rad_param_selection(train_x, train_y[target], 5, 'f1_macro', True)
 
-    print("\nKNN GRID SEARCH")
-    evaluate_classifier(knn_classifier, test_x, test_y[target])
+    print("\nRadiusNeighbors GRID SEARCH")
+    evaluate_classifier(rad_classifier, test_x, test_y[target])
+
+    # print("\nKNN GRID SEARCH")
+    # evaluate_classifier(knn_classifier, test_x, test_y[target])
 
     # print("\nSVM GRID SEARCH")
     # evaluate_classifier(svm_classifier, test_x, test_y[target])

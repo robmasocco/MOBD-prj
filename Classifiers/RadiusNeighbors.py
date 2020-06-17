@@ -1,28 +1,28 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: KNN.py
+    File: RadiusNeighbors.py
     Date created: 17/06/2020
     Description:
 
 """
 
 import sklearn.model_selection as model_select
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neighbors import RadiusNeighborsClassifier
 import numpy as np
 
 
-def knn_param_selection(train_x, train_y, n_folds, metric, verbose=False):
+def rad_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     # Hyperparameters grid to search.
-    param_grid_knn = [{'n_neighbors': [5, 2, 10, 15],
+    param_grid_rad = [{'radius': [1.0, 0.5, 1.5, 2.0],
                        'algorithm': ['ball_tree', 'kd_tree', 'brute'],
                        'weights': ['uniform', 'distance'],
                        'p': [2, 1]}]
 
     # Search and cross-validate over the grid.
-    clf = model_select.GridSearchCV(KNeighborsClassifier(
+    clf = model_select.GridSearchCV(RadiusNeighborsClassifier(
                                         n_jobs=-1),
-                                    param_grid_knn,
+                                    param_grid_rad,
                                     scoring=metric,
                                     cv=n_folds,
                                     refit=True,
