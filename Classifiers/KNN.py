@@ -14,7 +14,8 @@ import numpy as np
 
 def knn_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     # Hyperparameters grid to search.
-    param_grid_knn = [{'n_neighbors': [5, 2, 10],
+    param_grid_knn = [{'n_neighbors': [5, 2, 10, 15],
+                       'algorithm': ['ball_tree', 'kd_tree', 'brute'],
                        'weights': ['uniform', 'distance'],
                        'p': [2, 1]}]
 
