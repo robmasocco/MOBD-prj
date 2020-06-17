@@ -6,8 +6,7 @@
     Description: 
     
 """
-
-
+from sklearn.metrics import f1_score
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
@@ -16,8 +15,9 @@ from DataEvaluation import evaluate_classifier
 from DataPreparation import *
 from Classifiers.SVM import svm_param_selection
 from DataVisualization import *
-from Ouliers.KNNReplacerIQR import *
-
+from Ouliers import *
+from Ouliers.KNNReplacerIQR import KNNReplacerIQR
+from Ouliers.KNNReplacerZS import KNNReplacerZS
 
 """
 The works.
@@ -103,47 +103,82 @@ def main():
     """
 
     # Make pipeline
-    pipeline = Pipeline([('imputer', KNNImputer()),
-                         ('replacer', KNNReplacerIQR()),
-                         ('scaler', prep.StandardScaler()),
-                         ('classifier', SVC(kernel='rbf',
-                                            decision_function_shape='ovo',
-                                            random_state=0,
-                                            cache_size=3000))
-                         ])
+    pipeline_iqr = Pipeline([('imputer', KNNImputer()),
+                             ('replacer', KNNReplacerIQR()),
+                             ('scaler', prep.StandardScaler()),
+                             ('classifier', SVC(kernel='rbf',
+                                                decision_function_shape='ovo',
+                                                random_state=0,
+                                                cache_size=3000))
+                             ])
+
+    pipeline_zs = Pipeline([('imputer', KNNImputer()),
+                             ('replacer', KNNReplacerZS()),
+                             ('scaler', prep.StandardScaler()),
+                             ('classifier', SVC(kernel='rbf',
+                                                decision_function_shape='ovo',
+                                                random_state=0,
+                                                cache_size=3000))
+                             ])
 
     # Set the parameters
-    grid_pipeline = {'imputer__n_neighbors': [5],
-                     'replacer__n_neighbors': [5],
-                     'classifier__C': [2.75],
-                     'classifier__gamma': [0.05],
-                     'classifier__class_weight': [None, 'balanced']
-                     }
+    grid_pipeline_svc = {'imputer__n_neighbors': [2, 5, 10],
+                         'replacer__n_neighbors': [2, 5, 10],
+                         'classifier__C': [0.1, 1, 2.75, 5, 10],
+                         'classifier__gamma': [0.01, 0.05, 0.1],
+                         'classifier__class_weight': [None, 'balanced']
+                         }
 
-    clf = model_select.GridSearchCV(pipeline, param_grid=grid_pipeline, scoring='f1_macro', cv=5, refit=True, n_jobs=-1)
-    clf.fit(train_x, train_y[target])
+    gs_iqr = model_select.GridSearchCV(pipeline_iqr, param_grid=grid_pipeline_svc, scoring='f1_macro', cv=5, refit=True,
+                                        n_jobs=-1)
+    gs_zs = model_select.GridSearchCV(pipeline_zs, param_grid=grid_pipeline_svc, scoring='f1_macro', cv=5, refit=True,
+                                        n_jobs=-1)
 
-    print("\nGrid scores:\n")
-    means = clf.cv_results_['mean_test_score']
-    stds = clf.cv_results_['std_test_score']
-    for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-        print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
-    print("\nBest parameters:")
-    print(clf.best_params_)
+    # List of pipelines for ease of iteration
+    grids = [gs_iqr, gs_zs]
 
-    evaluate_classifier(clf, test_x, test_y[target])
+    # Dictionary of pipelines and classifier types for ease of reference
+    grid_dict = {1: 'IQR', 2: 'Z SCORE'}
 
-    imputer = KNNImputer(n_neighbors=clf.best_params_['imputer__n_neighbors'])
+    # Fit the grid search objects
+    print('Performing model optimizations...')
+    best_f1 = 0.0
+    best_clf = 0
+    best_gs = ''
+    for idx, gs in enumerate(grids):
+        print('\nEstimator: %s' % grid_dict[idx])
+        # Fit grid search
+        gs.fit(train_x, train_y[target])
+        #
+        print("\nGrid scores:\n")
+        means = gs.cv_results_['mean_test_score']
+        stds = gs.cv_results_['std_test_score']
+        for mean, std, params in zip(means, stds, gs.cv_results_['params']):
+            print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
+        print("\nBest parameters:")
+        print(gs.best_params_)
+        # Track best (highest test accuracy) model
+        f1_temp = evaluate_classifier(gs, test_x, test_y[target])
+        if f1_temp > best_f1:
+            best_f1 = f1_temp
+            best_gs = gs
+            best_clf = idx
+    print('\nClassifier with best test set f1 macro: %s' % grid_dict[best_clf])
+
+    # Preprocessing
+    imputer = KNNImputer(n_neighbors=best_gs.best_params_['imputer__n_neighbors'])
     x = imputer.fit_transform(x)
-    replacer = KNNReplacerIQR(n_neighbors=clf.best_params_['replacer__n_neighbors'])
+    replacer = KNNReplacerIQR(n_neighbors=best_gs.best_params_['replacer__n_neighbors'])
     x = replacer.fit_transform(x)
     scaler = prep.StandardScaler()
     x = scaler.fit_transform(x)
 
-    best_clf = SVC(kernel='rbf', C=clf.best_params_['classifier__C'], gamma=clf.best_params_['classifier__gamma'],
-                   class_weight=clf.best_params_['classifier__class_weight'], decision_function_shape='ovo',
+    final_clf = SVC(kernel='rbf', C=best_gs.best_params_['classifier__C'], gamma=best_gs.best_params_['classifier__gamma'],
+                   class_weight=best_gs.best_params_['classifier__class_weight'], decision_function_shape='ovo',
                    random_state=0, cache_size=3000)
-    best_clf.fit(x, y[target])
+    final_clf.fit(x, y[target])
+
+    print("F1 score final:")
     evaluate_classifier(best_clf, x, y[target])
 
 

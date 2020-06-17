@@ -14,9 +14,10 @@ from sklearn.base import TransformerMixin
 from sklearn.impute import KNNImputer
 
 
-class KNNReplacerZS(TransformerMixin):
+class KNNReplacerZS(KNNImputer):
 
     def __init__(self, n_neighbors=2):
+        super().__init__(n_neighbors=n_neighbors)
         self.mean = None
         self.std = None
         self.imputer = KNNImputer(n_neighbors=n_neighbors)
