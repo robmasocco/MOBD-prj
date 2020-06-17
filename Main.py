@@ -134,10 +134,12 @@ def main():
     # Define pipelines for preprocessing with KNN. TODO
 
     # Set the parameters grids. TODO others too!
+    c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
+    gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
     grid_pipeline_svc = {'imputer__n_neighbors': [2, 5, 10],
                          'replacer__n_neighbors': [2, 5, 10],
-                         'classifier__C': [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10],
-                         'classifier__gamma': [0.03, 0.05, 0.07, 0.1, 0.5],
+                         'classifier__C': c_range_svc,
+                         'classifier__gamma': gamma_range_svc,
                          'classifier__class_weight': [None, 'balanced']
                          }
 
@@ -148,6 +150,7 @@ def main():
                                        cv=5,
                                        refit=True,
                                        n_jobs=-1)
+
     gs_zs = model_select.GridSearchCV(pipeline_zs,
                                       param_grid=grid_pipeline_svc,
                                       scoring='f1_macro',
@@ -183,7 +186,7 @@ def main():
             print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
         print("\nBest parameters:")
         print(gs.best_params_)
-        f1_temp = evaluate_classifier(gs, test_x, test_y[target])
+        f1_temp = evaluate_classifier(gs, test_x, test_y[target])  # TODO MUST PREPROCESS ACCORDINGLY!
         if f1_temp > best_f1:
             best_f1 = f1_temp
             best_gs = gs
