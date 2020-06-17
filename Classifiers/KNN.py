@@ -8,19 +8,24 @@
 """
 
 import sklearn.model_selection as model_select
-from sklearn import svm
+from sklearn.neighbors import KNeighborsClassifier
 import numpy as np
 
 
 def knn_param_selection(train_x, train_y, n_folds, metric, verbose=False):
     # Hyperparameters grid to search.
-    param_grid_knn = [{'kernel': ['rbf'], 'C': [3], 'gamma': [0.05],
-                         'class_weight': [None, 'balanced']}]
+    param_grid_knn = [{'n_neighbors': [5, 2, 10],
+                       'weights': ['uniform', 'distance'],
+                       'p': [2, 1]}]
 
-    clf = model_select.GridSearchCV(svm.SVC(decision_function_shape='ovo',
-                                            cache_size=3000),
-                                    param_grid_tenny, scoring=metric,
-                                    cv=n_folds, refit=True, n_jobs=-1)
+    # Search and cross-validate over the grid.
+    clf = model_select.GridSearchCV(KNeighborsClassifier(
+                                        n_jobs=-1),
+                                    param_grid_knn,
+                                    scoring=metric,
+                                    cv=n_folds,
+                                    refit=True,
+                                    n_jobs=-1)
     clf.fit(train_x, train_y)
 
     # Print best parameters.
