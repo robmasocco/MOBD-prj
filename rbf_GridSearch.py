@@ -115,6 +115,7 @@ def main():
                          'classifier__gamma': gamma_range_svc_log2,
                          'classifier__class_weight': [None, 'balanced']
                          }
+
     grid_pipe_mean_rbf = {'classifier__C': c_range_svc_log2,
                           'classifier__gamma': gamma_range_svc_log2,
                           'classifier__class_weight': [None, 'balanced']
