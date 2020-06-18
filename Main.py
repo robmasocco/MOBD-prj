@@ -43,6 +43,7 @@ def main():
     # Separate features and target labels.
     x = dataset.drop(target, axis=1)
     y = dataset[[target]]
+    features_list = x.columns.values.tolist()
 
     # Split dataset in training set and test set.
     train_x, test_x, train_y, test_y =\
@@ -86,8 +87,10 @@ def main():
     # Define pipelines for preprocessing with KNN. TODO
 
     # Set the parameters grids. TODO others too!
-    c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
-    gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
+    #c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
+    #gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
+    c_range_svc = [1]
+    gamma_range_svc = [0.03]
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
     g_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
@@ -147,10 +150,13 @@ def main():
                                % (mean, std * 2, params))
         print("\nBest parameters:")
         print(pipe_gs.best_params_)
+        print("\nBest score: %0.4f" % pipe_gs.best_score_)
         if pipe_gs.best_score_ > best_f1:
             best_f1 = pipe_gs.best_score_
             best_idx = idx
             best_pipe = pipe_gs.best_estimator_
+        results_file.write("\nBest parameters:\n%r\n" % pipe_gs.best_params_)
+        results_file.write("\nBest score: %0.4f\n" % pipe_gs.best_score_)
 
         results_file.close()
 
@@ -158,7 +164,7 @@ def main():
           % grid_dict_pipe[best_idx])
 
     # Show information and plots about best preprocessing pipeline.
-    data_preparation_info(train_x, best_pipe)
+    data_preparation_info(train_x, features_list, best_pipe)
 
     # Evaluates the pipeline on the test set.
     print('\nTest set F1 macro: %0.4f'

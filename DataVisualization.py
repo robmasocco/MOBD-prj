@@ -22,9 +22,11 @@ def show_classes_proportions(dataset, title):
     return data_counts
 
 
-def show_histogram_features(data, title):
+def show_histogram_features(data, feat_names, title):
     """Displays features histogram."""
-    sns.distplot(data, kde=False).set(title=title)
+    fig, ax = plt.subplots()
+    ax.bar(feat_names, data)
+    ax.set_title(title)
     plt.show()
 
 

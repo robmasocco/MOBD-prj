@@ -21,7 +21,7 @@ def get_na_count(df):
     return na_mask.sum().sum()
 
 
-def data_preparation_info(train_x, pipeline):
+def data_preparation_info(train_x, feats_names, pipeline):
     """Prints information on the dataset."""
     # Missing values.
     print('\nMissing values')
@@ -52,8 +52,9 @@ def data_preparation_info(train_x, pipeline):
     print(train_x.describe())
     show_boxplot_features(train_x, 'Training set after scaling')
 
-    # Feature selection information.
+    # Feature selection information using PCA.
     pca = PCA(random_state=42)
     pca = pca.fit(train_x)
     show_histogram_features(pca.explained_variance_ratio_,
+                            feats_names,
                             'Feature importance by variance ratios')
