@@ -110,12 +110,12 @@ def main():
 
     grid_pipe_knn_rbf = {'imputer__n_neighbors': [2, 5, 10],
                          'replacer__n_neighbors': [2, 5, 10],
-                         'classifier__C': c_range_svc_log10,
-                         'classifier__gamma': gamma_range_svc_log10,
+                         'classifier__C': c_range_svc_log2,
+                         'classifier__gamma': gamma_range_svc_log2,
                          'classifier__class_weight': [None, 'balanced']
                          }
-    grid_pipe_mean_rbf = {'classifier__C': c_range_svc_log10,
-                          'classifier__gamma': gamma_range_svc_log10,
+    grid_pipe_mean_rbf = {'classifier__C': c_range_svc_log2,
+                          'classifier__gamma': gamma_range_svc_log2,
                           'classifier__class_weight': [None, 'balanced']
                           }
 
