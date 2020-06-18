@@ -61,7 +61,7 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # Define pipelines for preprocessing with SVMs (RBF kernel).
+    # Define pipelines for preprocessing with SVMs (polynomial kernel).
     pipe_poly_knn_iqr = Pipeline([('imputer', KNNImputer()),
                                   ('replacer', KNNReplacerIQR()),
                                   ('scaler', StandardScaler()),
