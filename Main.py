@@ -191,8 +191,12 @@ def main():
 
     print('\nClassifier with best test set F1 macro: %s' % grid_dict[best_clf])
 
+    # Evaluates the pipeline on the test set
+    # TODO Simply use Pipeline score
+    # Pipeline.score(test_x, test_y[target])
+
     # Preprocess the whole dataset using the best pipeline.
-    # TODO Replace all with Pipeline.score(test_x, test_y)
+    # TODO Replace all with Pipeline.fit(x, y[target])
     print("\nRE-PREPROCESSING DATASET WITH BEST PIPELINE")
     imputer = KNNImputer(n_neighbors=
                          best_gs.best_params_['imputer__n_neighbors'])
