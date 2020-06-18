@@ -39,9 +39,6 @@ def main():
     y = dataset[[target]]
     features_list = x.columns.values.tolist()  # TODO What for?
 
-    # Analyze dataset classes proportions.
-    show_classes_proportions(y, 'Dataset classes proportions')
-
     # Split dataset in training set and test set.
     train_x, test_x, train_y, test_y = model_select.train_test_split(x, y,
                                                                      test_size=0.2,
@@ -50,7 +47,9 @@ def main():
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
-    # Analyze train set and test set classes proportions.
+    # Displays the data
+    show_classes_proportions(y, 'Dataset classes proportions')
+    show_boxplot_features(train_x, 'Training set features boxplot')
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
@@ -76,7 +75,7 @@ def main():
         
     # Outliers
     print('\nOutliers')
-    show_boxplot_featrues(train_x, 'Test set features')
+    show_boxplot_features(train_x, 'Test set features')
     # IQR
     replacer = KNNReplacerIQR(n_neighbors=10)
     train_x = pd.DataFrame(replacer.fit_transform(train_x))
@@ -93,7 +92,7 @@ def main():
     if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
         print('Error: outliers')
         return -1
-    show_boxplot_featrues(train_x, 'Test set features')
+    show_boxplot_features(train_x, 'Test set features')
     
     # Scaling
     print('\nScaling')
@@ -103,7 +102,7 @@ def main():
     test_x = pd.DataFrame(scaler.transform(test_x))
     test_x.columns = features_list
     print(train_x.describe())
-    show_boxplot_featrues(train_x, 'Test set features')
+    show_boxplot_features(train_x, 'Test set features')
     """
 
     # Define pipelines for preprocessing with SVC.
@@ -161,8 +160,7 @@ def main():
     # TODO Now this must be extended.
     grid_dict = {0: 'IQR', 1: 'Z SCORE'}
 
-    # TODO A CSV report for each grid search must be generated here, too much
-    #  data all at once.
+    # TODO A CSV report for each grid search must be generated here, too much data all at once.
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
     best_f1 = 0.0
@@ -198,11 +196,9 @@ def main():
     # Preprocess the whole dataset using the best pipeline.
     # TODO Replace all with Pipeline.fit(x, y[target])
     print("\nRE-PREPROCESSING DATASET WITH BEST PIPELINE")
-    imputer = KNNImputer(n_neighbors=
-                         best_gs.best_params_['imputer__n_neighbors'])
+    imputer = KNNImputer(n_neighbors=best_gs.best_params_['imputer__n_neighbors'])
     x = imputer.fit_transform(x)
-    replacer = KNNReplacerIQR(n_neighbors=
-                              best_gs.best_params_['replacer__n_neighbors'])
+    replacer = KNNReplacerIQR(n_neighbors=best_gs.best_params_['replacer__n_neighbors'])
     x = replacer.fit_transform(x)
     scaler = prep.StandardScaler()
     x = scaler.fit_transform(x)
@@ -218,8 +214,7 @@ def main():
                     cache_size=3000,
                     C=best_gs.best_params_['classifier__C'],
                     gamma=best_gs.best_params_['classifier__gamma'],
-                    class_weight=
-                    best_gs.best_params_['classifier__class_weight'],
+                    class_weight=best_gs.best_params_['classifier__class_weight'],
                     )
     final_clf.fit(x, y[target])
 

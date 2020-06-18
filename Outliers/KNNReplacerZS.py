@@ -3,7 +3,7 @@
     Project: MOBD-prj
     File: KNNReplacerZS.py
     Date created: 17/06/2020
-    Description:
+    Description: Class to replace the outliers detected with Z-Score method through KNNImputer.
 """
 
 
@@ -21,7 +21,7 @@ class KNNReplacerZS(KNNImputer):
         self.imputer = KNNImputer(n_neighbors=n_neighbors)
 
     def fit(self, x, y=None):
-        """Computes Z score and fits the imputer on the data."""
+        """Computes Z-Score and fits the imputer on the data."""
         x = pd.DataFrame(x)
         self.mean = x.mean()
         self.std = x.std()

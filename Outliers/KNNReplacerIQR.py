@@ -3,7 +3,7 @@
     Project: MOBD-prj
     File: KNNReplacerIQR.py
     Date created: 17/06/2020
-    Description:
+    Description: Class to replace the outliers detected with IQR method through KNNImputer.
 """
 
 

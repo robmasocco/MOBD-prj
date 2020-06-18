@@ -12,23 +12,23 @@ import numpy as np
 import seaborn as sns
 
 
-# Analyze dataset classes proportions
+# Displays classes proportions
 def show_classes_proportions(dataset, title):
     data_counts = dataset['CLASS'].value_counts(normalize=True)
-    sns.countplot(x='CLASS', data=dataset).set(title=title)
-    plt.show()
     print('\n' + title)
     print(data_counts)
+    sns.countplot(x='CLASS', data=dataset).set(title=title)
+    plt.show()
     return data_counts
 
 
-# Analyze dataset classes proportions
+# Displays features boxplot
 def show_boxplot_features(dataset, title):
     sns.boxplot(data=dataset).set(title=title)
     plt.show()
 
 
-# Show confusion matrix with annotations.
+# Displays confusion matrix with annotations.
 def show_confusion_matrix(cm, f1_score):
     # Create annotations label.
     group_counts = ["{0:0.0f}\n".format(value) for value in cm.flatten()]
