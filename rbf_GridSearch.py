@@ -1,7 +1,7 @@
 """
     Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: Main.py
+    File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
 """
@@ -23,12 +23,11 @@ from DataVisualization import *
 from Outliers.KNNReplacerIQR import KNNReplacerIQR
 from Outliers.KNNReplacerZS import KNNReplacerZS
 from Outliers.MeanReplacerIQR import MeanReplacerIQR
+from Outliers.MeanReplacerZS import MeanReplacerZS
 
 from DataEvaluation import evaluate_classifier
 
 # Output data column.
-from Outliers.MeanReplacerZS import MeanReplacerZS
-
 target = 'CLASS'
 
 
@@ -62,51 +61,46 @@ def main():
     show_classes_proportions(test_y, 'Test set classes proportions')
 
     # Define pipelines for preprocessing with SVMs (RBF kernel).
-    pipeline_iqr = Pipeline([('imputer', KNNImputer()),
-                             ('replacer', KNNReplacerIQR()),
-                             ('scaler', StandardScaler()),
-                             ('classifier', SVC(kernel='rbf',
-                                                decision_function_shape='ovo',
-                                                random_state=42,
-                                                cache_size=3000))
-                             ])
-
-    pipeline_zs = Pipeline([('imputer', KNNImputer()),
-                            ('replacer', KNNReplacerZS()),
-                            ('scaler', StandardScaler()),
-                            ('classifier', SVC(kernel='rbf',
-                                               decision_function_shape='ovo',
-                                               random_state=42,
-                                               cache_size=3000))
-                            ])
-
-    pipeline_iqr_mean = Pipeline([('imputer', SimpleImputer()),
-                                  ('replacer', MeanReplacerIQR()),
-                                  ('scaler', StandardScaler()),
-                                  ('classifier', SVC(kernel='rbf',
-                                                     decision_function_shape='ovo',
-                                                     random_state=42,
-                                                     cache_size=3000))
-                                  ])
-
-    pipeline_zs_mean = Pipeline([('imputer', SimpleImputer()),
-                                 ('replacer', MeanReplacerZS()),
-                                 ('scaler', StandardScaler()),
-                                 ('classifier', SVC(kernel='rbf',
-                                                    decision_function_shape='ovo',
-                                                    random_state=42,
-                                                    cache_size=3000))
+    pipe_rbf_knn_iqr = Pipeline([('imputer', KNNImputer()),
+                                ('replacer', KNNReplacerIQR()),
+                                ('scaler', StandardScaler()),
+                                ('classifier',
+                                 SVC(kernel='rbf',
+                                     decision_function_shape='ovo',
+                                     random_state=42,
+                                     cache_size=3000))
                                  ])
 
-    # Define pipelines for preprocessing with SVMs (linear kernel). TODO
+    pipe_rbf_knn_zs = Pipeline([('imputer', KNNImputer()),
+                               ('replacer', KNNReplacerZS()),
+                               ('scaler', StandardScaler()),
+                               ('classifier', SVC(kernel='rbf',
+                                                  decision_function_shape='ovo',
+                                                  random_state=42,
+                                                  cache_size=3000))
+                                ])
 
-    # Define pipelines for preprocessing with SVMs (polynomial kernel). TODO
+    pipe_rbf_mean_iqr = Pipeline([('imputer', SimpleImputer()),
+                                  ('replacer', MeanReplacerIQR()),
+                                  ('scaler', StandardScaler()),
+                                  ('classifier',
+                                   SVC(kernel='rbf',
+                                       decision_function_shape='ovo',
+                                       random_state=42,
+                                       cache_size=3000))
+                                  ])
 
-    # Define pipelines for preprocessing with Random Forests. TODO
+    pipe_rbf_mean_zs = Pipeline([('imputer', SimpleImputer()),
+                                 ('replacer', MeanReplacerZS()),
+                                 ('scaler', StandardScaler()),
+                                 ('classifier',
+                                  SVC(kernel='rbf',
+                                      decision_function_shape='ovo',
+                                      random_state=42,
+                                      cache_size=3000))
+                                 ])
 
-    # Define pipelines for preprocessing with KNN. TODO
-
-    # Set the parameters grids. TODO others too!
+    # Set the parameters grids.
     # c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
     # gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
     c_range_svc = [3.5]
@@ -115,39 +109,58 @@ def main():
     g_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
     gamma_range_svc_log2 = 2. ** np.arange(-3, 3)
-    grid_pipeline_knn_svc = {'imputer__n_neighbors': [2, 5, 10],
-                             'replacer__n_neighbors': [2, 5, 10],
-                             'classifier__C': c_range_svc,
-                             'classifier__gamma': gamma_range_svc,
-                             'classifier__class_weight': [None, 'balanced']
-                             }
-    grid_pipeline_mean_svc = {'classifier__C': c_range_svc,
-                              'classifier__gamma': gamma_range_svc,
-                              'classifier__class_weight': [None, 'balanced']
-                              }
+
+    grid_pipe_knn_rbf = {'imputer__n_neighbors': [2, 5, 10],
+                         'replacer__n_neighbors': [2, 5, 10],
+                         'classifier__C': c_range_svc,
+                         'classifier__gamma': gamma_range_svc,
+                         'classifier__class_weight': [None, 'balanced']
+                         }
+    grid_pipe_mean_rbf = {'classifier__C': c_range_svc,
+                          'classifier__gamma': gamma_range_svc,
+                          'classifier__class_weight': [None, 'balanced']
+                          }
 
     # Define grid searches for each pipeline.
-    pipe_gs_iqr = model_select.GridSearchCV(pipeline_iqr_mean,
-                                            param_grid=grid_pipeline_mean_svc,
-                                            scoring='f1_macro',
-                                            cv=5,
-                                            refit=True,
-                                            n_jobs=-1)
+    gs_rbf_knn_iqr = model_select.GridSearchCV(pipe_rbf_knn_iqr,
+                                               param_grid=grid_pipe_knn_rbf,
+                                               scoring='f1_macro',
+                                               cv=5,
+                                               refit=True,
+                                               n_jobs=-1)
 
-    pipe_gs_zs = model_select.GridSearchCV(pipeline_zs_mean,
-                                           param_grid=grid_pipeline_mean_svc,
-                                           scoring='f1_macro',
-                                           cv=5,
-                                           refit=True,
-                                           n_jobs=-1)
+    gs_rbf_knn_zs = model_select.GridSearchCV(pipe_rbf_knn_zs,
+                                              param_grid=grid_pipe_knn_rbf,
+                                              scoring='f1_macro',
+                                              cv=5,
+                                              refit=True,
+                                              n_jobs=-1)
+
+    gs_rbf_mean_iqr = model_select.GridSearchCV(pipe_rbf_mean_iqr,
+                                                param_grid=grid_pipe_mean_rbf,
+                                                scoring='f1_macro',
+                                                cv=5,
+                                                refit=True,
+                                                n_jobs=-1)
+
+    gs_rbf_mean_zs = model_select.GridSearchCV(pipe_rbf_mean_zs,
+                                               param_grid=grid_pipe_mean_rbf,
+                                               scoring='f1_macro',
+                                               cv=5,
+                                               refit=True,
+                                               n_jobs=-1)
 
     # List of pipeline grids for ease of iteration.
-    grids = [pipe_gs_iqr, pipe_gs_zs]
+    grids = [gs_rbf_knn_iqr,
+             gs_rbf_knn_zs,
+             gs_rbf_mean_iqr,
+             gs_rbf_mean_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
-    # TODO Now this must be extended.
-    grid_dict_pipe = {0: 'IQR_SVM-RBF',
-                      1: 'Z SCORE_SVM-RBF'}
+    grid_dict_pipe = {0: 'SVM-RBF_KNN-IQR',
+                      1: 'SVM-RBF_KNN-ZS',
+                      2: 'SVM-RBF_MEAN-IQR',
+                      3: 'SVM-RBF_MEAN-ZS'}
 
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")

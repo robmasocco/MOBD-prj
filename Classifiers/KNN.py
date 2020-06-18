@@ -1,7 +1,7 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: Main.py
+    File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description:
 
