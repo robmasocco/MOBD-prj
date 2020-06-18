@@ -4,7 +4,6 @@
     File: Main.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
-
 """
 
 # TODO Which of these are really needed?
@@ -17,10 +16,8 @@ from DataEvaluation import evaluate_classifier
 from DataPreparation import *
 from Classifiers.SVM import svm_param_selection
 from DataVisualization import *
-from Ouliers import *
-from Ouliers.KNNReplacerIQR import KNNReplacerIQR
-from Ouliers.KNNReplacerZS import KNNReplacerZS
-
+from Outliers.KNNReplacerIQR import KNNReplacerIQR
+from Outliers.KNNReplacerZS import KNNReplacerZS
 
 # Output data column.
 target = 'CLASS'
@@ -46,11 +43,10 @@ def main():
     show_classes_proportions(y, 'Dataset classes proportions')
 
     # Split dataset in training set and test set.
-    train_x, test_x, train_y, test_y =\
-        model_select.train_test_split(x, y,
-                                      test_size=0.2,
-                                      random_state=0,
-                                      stratify=y)
+    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y,
+                                                                     test_size=0.2,
+                                                                     random_state=0,
+                                                                     stratify=y)
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
@@ -186,6 +182,7 @@ def main():
             print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
         print("\nBest parameters:")
         print(gs.best_params_)
+        # TODO Best on train set or test set??
         f1_temp = evaluate_classifier(gs, test_x, test_y[target])  # TODO MUST PREPROCESS ACCORDINGLY!
         if f1_temp > best_f1:
             best_f1 = f1_temp
@@ -195,6 +192,7 @@ def main():
     print('\nClassifier with best test set F1 macro: %s' % grid_dict[best_clf])
 
     # Preprocess the whole dataset using the best pipeline.
+    # TODO Replace all with Pipeline.score(test_x, test_y)
     print("\nRE-PREPROCESSING DATASET WITH BEST PIPELINE")
     imputer = KNNImputer(n_neighbors=
                          best_gs.best_params_['imputer__n_neighbors'])
@@ -220,6 +218,10 @@ def main():
                     best_gs.best_params_['classifier__class_weight'],
                     )
     final_clf.fit(x, y[target])
+
+    # TODO Pickle the pipeline fitted on the whole dataset
+    # pipeline_path = 'best_pipeline.sav'
+    # pickle.dump(model, open(pipeline_path, 'wb'))
 
     # Get an idea of the error by evaluating the model on the dataset.
     print("\nFINAL SCORE ON WHOLE DATASET")

@@ -3,8 +3,7 @@
     Project: MOBD-prj
     File: Main.py
     Date created: 15/06/2020
-    Description: 
-    
+    Description:
 """
 
 import sklearn.model_selection as model_select

@@ -1,10 +1,9 @@
 """
     Author: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: Main.py
+    File: DataVisualization.py
     Date created: 15/06/2020
-    Description: 
-    
+    Description:
 """
 
 
@@ -24,7 +23,7 @@ def show_classes_proportions(dataset, title):
 
 
 # Analyze dataset classes proportions
-def show_boxplot_featrues(dataset, title):
+def show_boxplot_features(dataset, title):
     sns.boxplot(data=dataset).set(title=title)
     plt.show()
 
