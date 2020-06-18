@@ -22,9 +22,9 @@ def show_classes_proportions(dataset, title):
     return data_counts
 
 
-def show_boxplot_features(dataset, title):
-    """Displays features boxplot."""
-    sns.boxplot(data=dataset).set(title=title)
+def show_histogram_features(data, title):
+    """Displays features histogram."""
+    sns.distplot(data, kde=False).set(title=title)
     plt.show()
 
 
@@ -48,4 +48,10 @@ def show_confusion_matrix(cm, f1_score, title):
         .set(title=title,
              xlabel='Predicted class\n\nF1 macro: %0.4f' % f1_score,
              ylabel='Actual class')
+    plt.show()
+
+
+def show_boxplot_features(dataset, title):
+    """Displays features boxplot."""
+    sns.boxplot(data=dataset).set(title=title)
     plt.show()
