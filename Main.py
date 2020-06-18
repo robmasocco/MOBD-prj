@@ -7,7 +7,9 @@
 """
 
 # TODO Which of these are really needed?
-from sklearn.metrics import f1_score
+import pickle
+
+import sklearn.metrics as metrics
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
@@ -37,7 +39,6 @@ def main():
     # Separate features and target labels.
     x = dataset.drop(target, axis=1)
     y = dataset[[target]]
-    features_list = x.columns.values.tolist()  # TODO What for?
 
     # Split dataset in training set and test set.
     train_x, test_x, train_y, test_y = model_select.train_test_split(x, y,
@@ -89,92 +90,75 @@ def main():
                          }
 
     # Define grid searches for each pipeline.
-    gs_iqr = model_select.GridSearchCV(pipeline_iqr,
-                                       param_grid=grid_pipeline_svc,
-                                       scoring='f1_macro',
-                                       cv=5,
-                                       refit=True,
-                                       n_jobs=-1)
+    pipe_gs_iqr = model_select.GridSearchCV(pipeline_iqr,
+                                            param_grid=grid_pipeline_svc,
+                                            scoring='f1_macro',
+                                            cv=5,
+                                            refit=True,
+                                            n_jobs=-1)
 
-    gs_zs = model_select.GridSearchCV(pipeline_zs,
-                                      param_grid=grid_pipeline_svc,
-                                      scoring='f1_macro',
-                                      cv=5,
-                                      refit=True,
-                                      n_jobs=-1)
+    pipe_gs_zs = model_select.GridSearchCV(pipeline_zs,
+                                           param_grid=grid_pipeline_svc,
+                                           scoring='f1_macro',
+                                           cv=5,
+                                           refit=True,
+                                           n_jobs=-1)
 
     # List of pipeline grids for ease of iteration.
-    grids = [gs_iqr, gs_zs]
+    grids = [pipe_gs_iqr, pipe_gs_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
     # TODO Now this must be extended.
-    grid_dict = {0: 'IQR', 1: 'Z SCORE'}
+    grid_dict_pipe = {0: 'IQR', 1: 'Z SCORE'}
 
     # TODO A CSV report for each grid search must be generated here, too much data all at once.
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
     best_f1 = 0.0
-    best_clf = 0
-    best_gs = ''
-    for idx, gs in enumerate(grids):
-        print('Currently trying model: %s' % grid_dict[idx])
+    best_idx = 0
+    best_pipe_gs = None
+    for idx, pipe_gs in enumerate(grids):
+        print('Currently trying model: %s' % grid_dict_pipe[idx])
 
         # Perform grid search.
-        gs.fit(train_x, train_y[target])
+        pipe_gs.fit(train_x, train_y[target])
 
         # Print scores and update bests.
         print("\nGrid scores:")
-        means = gs.cv_results_['mean_test_score']
-        stds = gs.cv_results_['std_test_score']
-        for mean, std, params in zip(means, stds, gs.cv_results_['params']):
+        means = pipe_gs.cv_results_['mean_test_score']
+        stds = pipe_gs.cv_results_['std_test_score']
+        for mean, std, params in zip(means, stds, pipe_gs.cv_results_['params']):
             print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
         print("\nBest parameters:")
-        print(gs.best_params_)
-        # TODO Best on train set or test set??
-        f1_temp = evaluate_classifier(gs, test_x, test_y[target])  # TODO MUST PREPROCESS ACCORDINGLY!
-        if f1_temp > best_f1:
-            best_f1 = f1_temp
-            best_gs = gs
-            best_clf = idx
+        print(pipe_gs.best_params_)
+        if pipe_gs.best_score_ > best_f1:
+            best_f1 = pipe_gs.best_score_
+            best_idx = idx
+            best_pipe_gs = pipe_gs
 
-    print('\nClassifier with best test set F1 macro: %s' % grid_dict[best_clf])
+    print('\nClassifier with best train set F1 macro: %s' % grid_dict_pipe[best_idx])
 
     # Evaluates the pipeline on the test set
-    # TODO Simply use Pipeline score
-    # Pipeline.score(test_x, test_y[target])
+    print('\nTest set F1 macro:', best_pipe_gs.score(test_x, test_y[target]))
 
     # Preprocess the whole dataset using the best pipeline.
-    # TODO Replace all with Pipeline.fit(x, y[target])
     print("\nRE-PREPROCESSING DATASET WITH BEST PIPELINE")
-    imputer = KNNImputer(n_neighbors=best_gs.best_params_['imputer__n_neighbors'])
-    x = imputer.fit_transform(x)
-    replacer = KNNReplacerIQR(n_neighbors=best_gs.best_params_['replacer__n_neighbors'])
-    x = replacer.fit_transform(x)
-    scaler = prep.StandardScaler()
-    x = scaler.fit_transform(x)
-    # TODO Add plots now to show effects of the preprocessing pipeline!
+    best_pipe_gs = best_pipe_gs.fit(x, y[target])
+    pred_y = best_pipe_gs.predict(x)
+    f1_score = metrics.f1_score(y[target], pred_y, average='macro')
+    print('\nPre Dataset F1 macro: %0.4f' % f1_score)
 
-    # Fit the best classifier on the whole dataset.
-    # TODO Must set best model, could also not be an SVM! Very unlikely though.
-    #  Use above _best_shit data.
-    print("\nFITTING BEST CLASSIFIER")
-    final_clf = SVC(kernel='rbf',
-                    decision_function_shape='ovo',
-                    random_state=0,
-                    cache_size=3000,
-                    C=best_gs.best_params_['classifier__C'],
-                    gamma=best_gs.best_params_['classifier__gamma'],
-                    class_weight=best_gs.best_params_['classifier__class_weight'],
-                    )
-    final_clf.fit(x, y[target])
+    #
+    pipeline_path = 'best_pipeline.sav'
+    file = open(pipeline_path, 'wb')
+    pickle.dump(best_pipe_gs, file)
+    file.close()
 
-    # TODO Pickle the pipeline fitted on the whole dataset
-    # pipeline_path = 'best_pipeline.sav'
-    # pickle.dump(model, open(pipeline_path, 'wb'))
-
-    # Get an idea of the error by evaluating the model on the dataset.
-    print("\nFINAL SCORE ON WHOLE DATASET")
-    evaluate_classifier(final_clf, x, y[target])
+    #
+    file = open(pipeline_path, 'rb')
+    model = pickle.load(file)
+    file.close()
+    print('\nPost Dataset F1 macro: %0.4f' % model.score(x, y[target]))
 
 
 # Start the script.
