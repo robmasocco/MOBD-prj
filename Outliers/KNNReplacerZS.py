@@ -14,6 +14,7 @@ from sklearn.impute import KNNImputer
 
 
 class KNNReplacerZS(KNNImputer):
+    """Pipeline-compliant KNNReplacer, based on Z-Score."""
 
     def __init__(self, n_neighbors=5):
         super().__init__(n_neighbors=n_neighbors)
