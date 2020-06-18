@@ -1,9 +1,10 @@
 """
-    Author: Alessandro Tenaglia, Roberto Masocco
+    Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
     File: KNNReplacerIQR.py
     Date created: 17/06/2020
-    Description: Class to replace the outliers detected with IQR method through KNNImputer.
+    Description: Class to replace the outliers detected with IQR method through
+                 KNNImputer.
 """
 
 

@@ -1,12 +1,12 @@
 """
-    Author: Alessandro Tenaglia, Roberto Masocco
+    Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
     File: Main.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
 """
 
-# TODO Which of these are really needed?
+
 import pickle
 
 import sklearn.metrics as metrics
@@ -14,12 +14,14 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
 
-from DataEvaluation import evaluate_classifier
 from DataPreparation import *
-from Classifiers.SVM import svm_param_selection
+
 from DataVisualization import *
+
 from Outliers.KNNReplacerIQR import KNNReplacerIQR
 from Outliers.KNNReplacerZS import KNNReplacerZS
+
+from DataEvaluation import evaluate_classifier
 
 # Output data column.
 target = 'CLASS'
@@ -41,10 +43,11 @@ def main():
     y = dataset[[target]]
 
     # Split dataset in training set and test set.
-    train_x, test_x, train_y, test_y = model_select.train_test_split(x, y,
-                                                                     test_size=0.2,
-                                                                     random_state=0,
-                                                                     stratify=y)
+    train_x, test_x, train_y, test_y =\
+        model_select.train_test_split(x, y,
+                                      test_size=0.2,
+                                      random_state=42,
+                                      stratify=y)
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
@@ -54,15 +57,13 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # TODO Redo other plots!
-
-    # Define pipelines for preprocessing with SVC.
+    # Define pipelines for preprocessing with SVMs.
     pipeline_iqr = Pipeline([('imputer', KNNImputer()),
                              ('replacer', KNNReplacerIQR()),
                              ('scaler', prep.StandardScaler()),
                              ('classifier', SVC(kernel='rbf',
                                                 decision_function_shape='ovo',
-                                                random_state=0,
+                                                random_state=42,
                                                 cache_size=3000))
                              ])
 
@@ -71,7 +72,7 @@ def main():
                             ('scaler', prep.StandardScaler()),
                             ('classifier', SVC(kernel='rbf',
                                                decision_function_shape='ovo',
-                                               random_state=0,
+                                               random_state=42,
                                                cache_size=3000))
                             ])
 
@@ -127,7 +128,8 @@ def main():
         print("\nGrid scores:")
         means = pipe_gs.cv_results_['mean_test_score']
         stds = pipe_gs.cv_results_['std_test_score']
-        for mean, std, params in zip(means, stds, pipe_gs.cv_results_['params']):
+        for mean, std, params in zip(means, stds,
+                                     pipe_gs.cv_results_['params']):
             print("%0.4f (+/-%0.03f) for %r" % (mean, std * 2, params))
         print("\nBest parameters:")
         print(pipe_gs.best_params_)
@@ -136,29 +138,31 @@ def main():
             best_idx = idx
             best_pipe_gs = pipe_gs
 
-    print('\nClassifier with best train set F1 macro: %s' % grid_dict_pipe[best_idx])
+    print('\nPipeline with best training set F1 macro score: %s'
+          % grid_dict_pipe[best_idx])
 
-    # Evaluates the pipeline on the test set
-    print('\nTest set F1 macro:', best_pipe_gs.score(test_x, test_y[target]))
+    # Evaluates the pipeline on the test set.
+    print('\nTest set F1 macro:', evaluate_classifier(best_pipe_gs,
+                                                      test_x, test_y[target]))
 
-    # Preprocess the whole dataset using the best pipeline.
-    print("\nRE-PREPROCESSING DATASET WITH BEST PIPELINE")
+    # Refit the best pipeline on the whole dataset.
+    print("\nRE-FITTING BEST PIPELINE ON WHOLE DATASET")
     best_pipe_gs = best_pipe_gs.fit(x, y[target])
     pred_y = best_pipe_gs.predict(x)
     f1_score = metrics.f1_score(y[target], pred_y, average='macro')
-    print('\nPre Dataset F1 macro: %0.4f' % f1_score)
+    print('\n(Pre-save) Dataset F1 macro: %0.4f' % f1_score)
 
-    #
+    # Serialize and dump the best model.
     pipeline_path = 'best_pipeline.sav'
-    file = open(pipeline_path, 'wb')
-    pickle.dump(best_pipe_gs, file)
-    file.close()
+    model_file = open(pipeline_path, 'wb')
+    pickle.dump(best_pipe_gs, model_file)
+    model_file.close()
 
-    #
-    file = open(pipeline_path, 'rb')
-    model = pickle.load(file)
-    file.close()
-    print('\nPost Dataset F1 macro: %0.4f' % model.score(x, y[target]))
+    # Reload best model and check if the save went well.
+    model_file = open(pipeline_path, 'rb')
+    model = pickle.load(model_file)
+    model_file.close()
+    print('\n(Post-save) Dataset F1 macro: %0.4f' % model.score(x, y[target]))
 
 
 # Start the script.
