@@ -104,18 +104,18 @@ def main():
     c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
     gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
-    g_range_svc_log10 = 10. ** np.arange(-5, 4)
+    gamma_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
     gamma_range_svc_log2 = 2. ** np.arange(-3, 3)
 
     grid_pipe_knn_rbf = {'imputer__n_neighbors': [2, 5, 10],
                          'replacer__n_neighbors': [2, 5, 10],
-                         'classifier__C': c_range_svc,
-                         'classifier__gamma': gamma_range_svc,
+                         'classifier__C': c_range_svc_log10,
+                         'classifier__gamma': gamma_range_svc_log10,
                          'classifier__class_weight': [None, 'balanced']
                          }
-    grid_pipe_mean_rbf = {'classifier__C': c_range_svc,
-                          'classifier__gamma': gamma_range_svc,
+    grid_pipe_mean_rbf = {'classifier__C': c_range_svc_log10,
+                          'classifier__gamma': gamma_range_svc_log10,
                           'classifier__class_weight': [None, 'balanced']
                           }
 
