@@ -117,39 +117,39 @@ def main():
                           }
 
     # Define grid searches for each pipeline.
-    gs_linear_knn_iqr = model_select.GridSearchCV(pipe_linear_knn_iqr,
-                                                  param_grid=grid_pipe_knn_lin,
-                                                  scoring='f1_macro',
-                                                  cv=5,
-                                                  refit=True,
-                                                  n_jobs=-1)
+    gs_lin_knn_iqr = model_select.GridSearchCV(pipe_linear_knn_iqr,
+                                               param_grid=grid_pipe_knn_lin,
+                                               scoring='f1_macro',
+                                               cv=5,
+                                               refit=True,
+                                               n_jobs=-1)
 
-    gs_linear_knn_zs = model_select.GridSearchCV(pipe_linear_knn_zs,
-                                                 param_grid=grid_pipe_knn_lin,
-                                                 scoring='f1_macro',
-                                                 cv=5,
-                                                 refit=True,
-                                                 n_jobs=-1)
+    gs_lin_knn_zs = model_select.GridSearchCV(pipe_linear_knn_zs,
+                                              param_grid=grid_pipe_knn_lin,
+                                              scoring='f1_macro',
+                                              cv=5,
+                                              refit=True,
+                                              n_jobs=-1)
 
-    gs_linear_mean_iqr = model_select.GridSearchCV(pipe_linear_mean_iqr,
-                                                   param_grid=grid_pipe_mean_lin,
-                                                   scoring='f1_macro',
-                                                   cv=5,
-                                                   refit=True,
-                                                   n_jobs=-1)
+    gs_lin_mean_iqr = model_select.GridSearchCV(pipe_linear_mean_iqr,
+                                                param_grid=grid_pipe_mean_lin,
+                                                scoring='f1_macro',
+                                                cv=5,
+                                                refit=True,
+                                                n_jobs=-1)
 
-    gs_linear_mean_zs = model_select.GridSearchCV(pipe_linear_mean_zs,
-                                                  param_grid=grid_pipe_mean_lin,
-                                                  scoring='f1_macro',
-                                                  cv=5,
-                                                  refit=True,
-                                                  n_jobs=-1)
+    gs_lin_mean_zs = model_select.GridSearchCV(pipe_linear_mean_zs,
+                                               param_grid=grid_pipe_mean_lin,
+                                               scoring='f1_macro',
+                                               cv=5,
+                                               refit=True,
+                                               n_jobs=-1)
 
     # List of pipeline grids for ease of iteration.
-    grids = [gs_linear_knn_iqr,
-             gs_linear_knn_zs,
-             gs_linear_mean_iqr,
-             gs_linear_mean_zs]
+    grids = [gs_lin_knn_iqr,
+             gs_lin_knn_zs,
+             gs_lin_mean_iqr,
+             gs_lin_mean_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
     grid_dict_pipe = {0: 'SVM-LINEAR_KNN-IQR',
