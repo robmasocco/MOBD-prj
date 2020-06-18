@@ -6,10 +6,9 @@
     Description: Grid searches for best preprocessing pipeline and classifier.
 """
 
-
 import pickle
 
-from sklearn.impute import KNNImputer
+from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
@@ -23,10 +22,13 @@ from DataVisualization import *
 
 from Outliers.KNNReplacerIQR import KNNReplacerIQR
 from Outliers.KNNReplacerZS import KNNReplacerZS
+from Outliers.MeanReplacerIQR import MeanReplacerIQR
 
 from DataEvaluation import evaluate_classifier
 
 # Output data column.
+from Outliers.MeanReplacerZS import MeanReplacerZS
+
 target = 'CLASS'
 
 
@@ -46,7 +48,7 @@ def main():
     features_list = x.columns.values.tolist()
 
     # Split dataset in training set and test set.
-    train_x, test_x, train_y, test_y =\
+    train_x, test_x, train_y, test_y = \
         model_select.train_test_split(x, y,
                                       test_size=0.2,
                                       random_state=42,
@@ -78,6 +80,24 @@ def main():
                                                cache_size=3000))
                             ])
 
+    pipeline_iqr_mean = Pipeline([('imputer', SimpleImputer()),
+                                  ('replacer', MeanReplacerIQR()),
+                                  ('scaler', StandardScaler()),
+                                  ('classifier', SVC(kernel='rbf',
+                                                     decision_function_shape='ovo',
+                                                     random_state=42,
+                                                     cache_size=3000))
+                                  ])
+
+    pipeline_zs_mean = Pipeline([('imputer', SimpleImputer()),
+                                 ('replacer', MeanReplacerZS()),
+                                 ('scaler', StandardScaler()),
+                                 ('classifier', SVC(kernel='rbf',
+                                                    decision_function_shape='ovo',
+                                                    random_state=42,
+                                                    cache_size=3000))
+                                 ])
+
     # Define pipelines for preprocessing with SVMs (linear kernel). TODO
 
     # Define pipelines for preprocessing with SVMs (polynomial kernel). TODO
@@ -87,31 +107,35 @@ def main():
     # Define pipelines for preprocessing with KNN. TODO
 
     # Set the parameters grids. TODO others too!
-    #c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
-    #gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
-    c_range_svc = [1]
-    gamma_range_svc = [0.03]
+    # c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
+    # gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
+    c_range_svc = [3.5]
+    gamma_range_svc = [0.05]
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
     g_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
     gamma_range_svc_log2 = 2. ** np.arange(-3, 3)
-    grid_pipeline_svc = {'imputer__n_neighbors': [2, 5, 10],
-                         'replacer__n_neighbors': [2, 5, 10],
-                         'classifier__C': c_range_svc,
-                         'classifier__gamma': gamma_range_svc,
-                         'classifier__class_weight': [None, 'balanced']
-                         }
+    grid_pipeline_knn_svc = {'imputer__n_neighbors': [2, 5, 10],
+                             'replacer__n_neighbors': [2, 5, 10],
+                             'classifier__C': c_range_svc,
+                             'classifier__gamma': gamma_range_svc,
+                             'classifier__class_weight': [None, 'balanced']
+                             }
+    grid_pipeline_mean_svc = {'classifier__C': c_range_svc,
+                              'classifier__gamma': gamma_range_svc,
+                              'classifier__class_weight': [None, 'balanced']
+                              }
 
     # Define grid searches for each pipeline.
-    pipe_gs_iqr = model_select.GridSearchCV(pipeline_iqr,
-                                            param_grid=grid_pipeline_svc,
+    pipe_gs_iqr = model_select.GridSearchCV(pipeline_iqr_mean,
+                                            param_grid=grid_pipeline_mean_svc,
                                             scoring='f1_macro',
                                             cv=5,
                                             refit=True,
                                             n_jobs=-1)
 
-    pipe_gs_zs = model_select.GridSearchCV(pipeline_zs,
-                                           param_grid=grid_pipeline_svc,
+    pipe_gs_zs = model_select.GridSearchCV(pipeline_zs_mean,
+                                           param_grid=grid_pipeline_mean_svc,
                                            scoring='f1_macro',
                                            cv=5,
                                            refit=True,
@@ -137,7 +161,7 @@ def main():
         pipe_gs.fit(train_x, train_y[target])
 
         # Dump detailed scores on a file.
-        results_file = open(grid_dict_pipe[idx]+'_results.txt', 'w')
+        results_file = open(grid_dict_pipe[idx] + '_results.txt', 'w')
 
         # Print scores and update bests.
         print("\nGrid scores:")
