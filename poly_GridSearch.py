@@ -109,12 +109,12 @@ def main():
 
     grid_pipe_knn_poly = {'imputer__n_neighbors': [2, 5, 10],
                           'replacer__n_neighbors': [2, 5, 10],
-                          'classifier__C': c_range_svc_log10,
+                          'classifier__C': c_range_svc_log2,
                           'classifier__degree': degree_range_svc,
                           'classifier__class_weight': [None, 'balanced']
                           }
 
-    grid_pipe_mean_poly = {'classifier__C': c_range_svc_log10,
+    grid_pipe_mean_poly = {'classifier__C': c_range_svc_log2,
                            'classifier__degree': degree_range_svc,
                            'classifier__class_weight': [None, 'balanced']
                            }
