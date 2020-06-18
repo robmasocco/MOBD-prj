@@ -4,6 +4,7 @@
     File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
+                 SVM with RBF kernel.
 """
 
 import pickle

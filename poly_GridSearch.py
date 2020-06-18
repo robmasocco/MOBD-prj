@@ -4,6 +4,7 @@
     File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
+                 SVM with polynomial kernel.
 """
 
 import pickle
@@ -74,10 +75,11 @@ def main():
     pipe_poly_knn_zs = Pipeline([('imputer', KNNImputer()),
                                  ('replacer', KNNReplacerZS()),
                                  ('scaler', StandardScaler()),
-                                 ('classifier', SVC(kernel='poly',
-                                                    decision_function_shape='ovo',
-                                                    random_state=42,
-                                                    cache_size=3000))
+                                 ('classifier',
+                                  SVC(kernel='poly',
+                                      decision_function_shape='ovo',
+                                      random_state=42,
+                                      cache_size=3000))
                                  ])
 
     pipe_poly_mean_iqr = Pipeline([('imputer', SimpleImputer()),
@@ -103,15 +105,16 @@ def main():
     # Set the parameters grids.
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
-    degree_range_svc = [1, 2, 3, 4, 5]
+    degree_range_svc = [1, 2, 3, 4]
 
     grid_pipe_knn_poly = {'imputer__n_neighbors': [2, 5, 10],
                           'replacer__n_neighbors': [2, 5, 10],
-                          'classifier__C': c_range_svc_log2,
+                          'classifier__C': c_range_svc_log10,
                           'classifier__degree': degree_range_svc,
                           'classifier__class_weight': [None, 'balanced']
                           }
-    grid_pipe_mean_poly = {'classifier__C': c_range_svc_log2,
+
+    grid_pipe_mean_poly = {'classifier__C': c_range_svc_log10,
                            'classifier__degree': degree_range_svc,
                            'classifier__class_weight': [None, 'balanced']
                            }
