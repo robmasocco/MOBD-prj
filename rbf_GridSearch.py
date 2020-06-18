@@ -101,10 +101,8 @@ def main():
                                  ])
 
     # Set the parameters grids.
-    # c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
-    # gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
-    c_range_svc = [3.5]
-    gamma_range_svc = [0.05]
+    c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
+    gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
     g_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
@@ -213,7 +211,7 @@ def main():
     # Refit the best pipeline on the whole dataset.
     print("\nRE-FITTING BEST PIPELINE ON WHOLE DATASET")
     best_pipe = best_pipe.fit(x, y[target])
-    print('\n(Post-save) Dataset F1 macro: %0.4f'
+    print('\n(Pre-save) Dataset F1 macro: %0.4f'
           % evaluate_classifier(best_pipe,
                                 x,
                                 y[target],
