@@ -47,63 +47,13 @@ def main():
     print('\nTraining set shape:', train_x.shape, train_y.shape)
     print('Test set shape:', test_x.shape, test_y.shape)
 
-    # Displays the data
+    # Display the data.
     show_classes_proportions(y, 'Dataset classes proportions')
     show_boxplot_features(train_x, 'Training set features boxplot')
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
     # TODO Redo other plots!
-
-    # TODO Can this be removed?
-    """
-    # Missing values
-    print('\nMissing values')
-    print('Train nan: ', get_na_count(train_x))
-    print('Test nan: ', get_na_count(test_x))
-    # Mean
-    # train_mean = train_x.mean()
-    # train_x = train_x.fillna(train_mean)
-    # test_x = test_x.fillna(train_mean)
-    # KNN
-    imputer = KNNImputer(n_neighbors=10)
-    train_x = pd.DataFrame(imputer.fit_transform(train_x))
-    test_x = pd.DataFrame(imputer.transform(test_x))
-    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
-        print('Error: missing values')
-        return -1
-        
-    # Outliers
-    print('\nOutliers')
-    show_boxplot_features(train_x, 'Test set features')
-    # IQR
-    replacer = KNNReplacerIQR(n_neighbors=10)
-    train_x = pd.DataFrame(replacer.fit_transform(train_x))
-    test_x = pd.DataFrame(replacer.transform(test_x))
-    # Z Score
-    # train_mean = train_x.mean()
-    # train_std = train_x.std()
-    # train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
-    # test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
-    print('Train outliers: ', get_na_count(train_x))
-    print('Test outliers: ', get_na_count(test_x))
-    train_x = pd.DataFrame(imputer.fit_transform(train_x))
-    test_x = pd.DataFrame(imputer.transform(test_x))
-    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
-        print('Error: outliers')
-        return -1
-    show_boxplot_features(train_x, 'Test set features')
-    
-    # Scaling
-    print('\nScaling')
-    scaler = prep.StandardScaler()
-    train_x = pd.DataFrame(scaler.fit_transform(train_x))
-    train_x.columns = features_list
-    test_x = pd.DataFrame(scaler.transform(test_x))
-    test_x.columns = features_list
-    print(train_x.describe())
-    show_boxplot_features(train_x, 'Test set features')
-    """
 
     # Define pipelines for preprocessing with SVC.
     pipeline_iqr = Pipeline([('imputer', KNNImputer()),

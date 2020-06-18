@@ -12,6 +12,9 @@ import numpy as np
 from sklearn.impute import SimpleImputer, KNNImputer
 import sklearn.preprocessing as prep
 
+from DataVisualization import *
+from Outliers.KNNReplacerIQR import KNNReplacerIQR
+
 
 # Count missing values
 def get_na_count(df):
@@ -33,23 +36,50 @@ def iqr_bounds(df):
     return q1 - (1.5*iqr), q3 + (1.5*iqr)
 
 
-def data_preparation(dataset):
-    # 0. Separate features and target labels
-    x = dataset.drop('CLASS', axis=1)
-    y = dataset[['CLASS']]
-    features_list = x.columns.values.tolist()
-
-    # 1. Fill missing values with KNN method
+def old_data_preparation(train_x, test_x):
+    # Missing values
+    print('\nMissing values')
+    print('Train nan: ', get_na_count(train_x))
+    print('Test nan: ', get_na_count(test_x))
+    # Mean
+    # train_mean = train_x.mean()
+    # train_x = train_x.fillna(train_mean)
+    # test_x = test_x.fillna(train_mean)
+    # KNN
     imputer = KNNImputer(n_neighbors=10)
-    dataset = pd.DataFrame(imputer.fit_transform(dataset))
+    train_x = pd.DataFrame(imputer.fit_transform(train_x))
+    test_x = pd.DataFrame(imputer.transform(test_x))
+    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
+        print('Error: missing values')
+        return -1
 
-    # 2. Detect outliers with IQR and replace with KNN method
-    lower_bound, upper_bound = iqr_bounds(dataset)
-    dataset.where(~((dataset < lower_bound) | (dataset > upper_bound)), np.nan, inplace=True)
+    # Outliers
+    print('\nOutliers')
+    show_boxplot_features(train_x, 'Test set features')
+    # IQR
+    replacer = KNNReplacerIQR(n_neighbors=10)
+    train_x = pd.DataFrame(replacer.fit_transform(train_x))
+    test_x = pd.DataFrame(replacer.transform(test_x))
+    # Z Score
+    # train_mean = train_x.mean()
+    # train_std = train_x.std()
+    # train_x.where(~(((train_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    # test_x.where(~(((test_x - train_mean) / train_std).abs() > 3), np.nan, inplace=True)
+    print('Train outliers: ', get_na_count(train_x))
+    print('Test outliers: ', get_na_count(test_x))
+    train_x = pd.DataFrame(imputer.fit_transform(train_x))
+    test_x = pd.DataFrame(imputer.transform(test_x))
+    if get_na_count(train_x) != 0 or get_na_count(test_x) != 0:
+        print('Error: outliers')
+        return -1
+    show_boxplot_features(train_x, 'Test set features')
 
-    # 3. Scaling data with standard scaler
+    # Scaling
+    print('\nScaling')
     scaler = prep.StandardScaler()
-    dataset = pd.DataFrame(scaler.fit_transform(dataset))
-    dataset.columns = features_list
+    train_x = pd.DataFrame(scaler.fit_transform(train_x))
+    test_x = pd.DataFrame(scaler.transform(test_x))
+    print(train_x.describe())
+    show_boxplot_features(train_x, 'Test set features')
 
-    return x, y
+    return train_x, test_x
