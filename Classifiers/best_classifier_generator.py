@@ -2,36 +2,58 @@
     Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
     File: rbf_GridSearch.py
-    Date created: 15/06/2020
-    Description: Grid searches for best preprocessing pipeline and classifier.
-                 Random Forests.
+    Date created: 19/06/2020
+    Description: Script to generate and save best classifier.
 """
 
 import pickle
 
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import KNNImputer, SimpleImputer
+from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
-
-import numpy as np
-
-import pandas as pd
 
 from DataPreparation import *
 
 from DataVisualization import *
 
-from Outliers.KNNReplacerIQR import KNNReplacerIQR
-from Outliers.KNNReplacerZS import KNNReplacerZS
-from Outliers.MeanReplacerIQR import MeanReplacerIQR
-from Outliers.MeanReplacerZS import MeanReplacerZS
-
 from DataEvaluation import evaluate_classifier
+
 
 # Output data column.
 target = 'CLASS'
+
+
+class KNNReplacerIQR(KNNImputer):
+    """Pipeline-compliant KNNReplacer, based on IQR."""
+
+    def __init__(self, n_neighbors=5):
+        super().__init__(n_neighbors=n_neighbors)
+        self.lower_bound = None
+        self.upper_bound = None
+        self.imputer = KNNImputer(n_neighbors=n_neighbors)
+
+    def fit(self, x, y=None):
+        """Computes IQR bound and fits the imputer on the data."""
+        x = pd.DataFrame(x)
+        q1 = x.quantile(0.25)
+        q3 = x.quantile(0.75)
+        iqr = q3 - q1
+        self.lower_bound = q1 - (1.5 * iqr)
+        self.upper_bound = q3 + (1.5 * iqr)
+        self.imputer.fit(
+            x.where(~((x < self.lower_bound) | (x > self.upper_bound)), np.nan)
+        )
+        return self
+
+    def transform(self, x, y=None):
+        """Detects outliers and replaces them with the imputer."""
+        x = pd.DataFrame(x)
+        x.where(~((x < self.lower_bound) | (x > self.upper_bound)),
+                np.nan,
+                inplace=True)
+        return self.imputer.transform(x)
 
 
 def main():
@@ -63,97 +85,38 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # Define pipelines for preprocessing with Random Forests.
-    pipe_rf_knn_iqr = Pipeline([('imputer', KNNImputer()),
+    # Define pipelines for preprocessing with SVMs (RBF kernel).
+    pipe_rbf_knn_iqr = Pipeline([('imputer', KNNImputer()),
                                 ('replacer', KNNReplacerIQR()),
                                 ('scaler', StandardScaler()),
                                 ('classifier',
-                                 RandomForestClassifier(random_state=42,
-                                                        n_jobs=-1))
-                                ])
-
-    pipe_rf_knn_zs = Pipeline([('imputer', KNNImputer()),
-                               ('replacer', KNNReplacerZS()),
-                               ('scaler', StandardScaler()),
-                               ('classifier',
-                                RandomForestClassifier(random_state=42,
-                                                       n_jobs=-1))
-                               ])
-
-    pipe_rf_mean_iqr = Pipeline([('imputer', SimpleImputer()),
-                                 ('replacer', MeanReplacerIQR()),
-                                 ('scaler', StandardScaler()),
-                                 ('classifier',
-                                  RandomForestClassifier(random_state=42,
-                                                         n_jobs=-1))
+                                 SVC(kernel='rbf',
+                                     decision_function_shape='ovo',
+                                     random_state=42,
+                                     cache_size=3000))
                                  ])
 
-    pipe_rf_mean_zs = Pipeline([('imputer', SimpleImputer()),
-                                ('replacer', MeanReplacerZS()),
-                                ('scaler', StandardScaler()),
-                                ('classifier',
-                                 RandomForestClassifier(random_state=42,
-                                                        n_jobs=-1))
-                                ])
-
-    grid_pipe_knn_rf = {'imputer__n_neighbors': [2, 5, 10],
-                        'replacer__n_neighbors': [2, 5, 10],
-                        'classifier__bootstrap': [True, False],
-                        'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                        'classifier__max_features': ['auto', 'sqrt'],
-                        'classifier__min_samples_leaf': [1, 2, 4],
-                        'classifier__min_samples_split': [2, 5, 10],
-                        'classifier__n_estimators': [100, 250, 500, 750, 1000]
-                        }
-
-    grid_pipe_mean_rf = {'classifier__bootstrap': [True, False],
-                         'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                         'classifier__max_features': ['auto', 'sqrt'],
-                         'classifier__min_samples_leaf': [1, 2, 4],
-                         'classifier__min_samples_split': [2, 5, 10],
-                         'classifier__n_estimators': [100, 250, 500, 750, 1000]
+    # Set the parameters grids.
+    grid_pipe_knn_rbf = {'imputer__n_neighbors': [2],
+                         'replacer__n_neighbors': [2],
+                         'classifier__C': [50],
+                         'classifier__gamma': [0.01],
+                         'classifier__class_weight': [None]
                          }
 
     # Define grid searches for each pipeline.
-    gs_rf_knn_iqr = model_select.GridSearchCV(pipe_rf_knn_iqr,
-                                              param_grid=grid_pipe_knn_rf,
-                                              scoring='f1_macro',
-                                              cv=5,
-                                              refit=True,
-                                              n_jobs=-1)
-
-    gs_rf_knn_zs = model_select.GridSearchCV(pipe_rf_knn_zs,
-                                             param_grid=grid_pipe_knn_rf,
-                                             scoring='f1_macro',
-                                             cv=5,
-                                             refit=True,
-                                             n_jobs=-1)
-
-    gs_rf_mean_iqr = model_select.GridSearchCV(pipe_rf_mean_iqr,
-                                               param_grid=grid_pipe_mean_rf,
+    gs_rbf_knn_iqr = model_select.GridSearchCV(pipe_rbf_knn_iqr,
+                                               param_grid=grid_pipe_knn_rbf,
                                                scoring='f1_macro',
                                                cv=5,
                                                refit=True,
                                                n_jobs=-1)
 
-    gs_rf_mean_zs = model_select.GridSearchCV(pipe_rf_mean_zs,
-                                              param_grid=grid_pipe_mean_rf,
-                                              scoring='f1_macro',
-                                              cv=5,
-                                              refit=True,
-                                              n_jobs=-1)
-
     # List of pipeline grids for ease of iteration.
-    grids = [gs_rf_knn_iqr]
-             #gs_rf_knn_zs,
-             #gs_rf_mean_iqr,
-             #gs_rf_mean_zs]
+    grids = [gs_rbf_knn_iqr]
 
     # Dictionary of pipelines and classifier types for ease of reference.
-    grid_dict_pipe = {0: 'RAND-FOREST_KNN-IQR',
-                      1: 'RAND-FOREST_KNN-ZS',
-                      2: 'RAND-FOREST_MEAN-IQR',
-                      3: 'RAND-FOREST_MEAN-ZS'}
+    grid_dict_pipe = {0: 'SVM-RBF_KNN-IQR'}
 
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
