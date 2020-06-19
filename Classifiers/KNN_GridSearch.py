@@ -94,8 +94,7 @@ def main():
                          'classifier__p': [1, 2]
                          }
 
-    grid_pipe_mean_knn = {'replacer__n_neighbors': [2, 5, 10],
-                          'classifier__n_neighbors': [2, 5, 10],
+    grid_pipe_mean_knn = {'classifier__n_neighbors': [2, 5, 10],
                           'classifier__weights': ['uniform', 'distance'],
                           'classifier__p': [1, 2]
                           }
