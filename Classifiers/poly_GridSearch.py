@@ -35,7 +35,7 @@ target = 'CLASS'
 def main():
     """Performs analysis and determines the best model for this problem."""
     # Read dataset.
-    dataset_path = 'Dataset/training_set.csv'
+    dataset_path = '../Dataset/training_set.csv'
     dataset = pd.read_csv(dataset_path)
     print("DATASET IMPORTED")
     print('\nDataset shape:', dataset.shape)

@@ -4,7 +4,7 @@
     File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
-                 SVM with linear kernel.
+                 SVM with RBF kernel.
 """
 
 import pickle
@@ -35,7 +35,7 @@ target = 'CLASS'
 def main():
     """Performs analysis and determines the best model for this problem."""
     # Read dataset.
-    dataset_path = 'Dataset/training_set.csv'
+    dataset_path = '../Dataset/training_set.csv'
     dataset = pd.read_csv(dataset_path)
     print("DATASET IMPORTED")
     print('\nDataset shape:', dataset.shape)
@@ -61,101 +61,106 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # Define pipelines for preprocessing with SVMs (linear kernel).
-    pipe_linear_knn_iqr = Pipeline([('imputer', KNNImputer()),
-                                    ('replacer', KNNReplacerIQR()),
-                                    ('scaler', StandardScaler()),
-                                    ('classifier',
-                                     SVC(kernel='linear',
-                                         decision_function_shape='ovo',
-                                         random_state=42,
-                                         cache_size=3000))
-                                    ])
+    # Define pipelines for preprocessing with SVMs (RBF kernel).
+    pipe_rbf_knn_iqr = Pipeline([('imputer', KNNImputer()),
+                                ('replacer', KNNReplacerIQR()),
+                                ('scaler', StandardScaler()),
+                                ('classifier',
+                                 SVC(kernel='rbf',
+                                     decision_function_shape='ovo',
+                                     random_state=42,
+                                     cache_size=3000))
+                                 ])
 
-    pipe_linear_knn_zs = Pipeline([('imputer', KNNImputer()),
-                                   ('replacer', KNNReplacerZS()),
-                                   ('scaler', StandardScaler()),
-                                   ('classifier',
-                                    SVC(kernel='linear',
-                                        decision_function_shape='ovo',
-                                        random_state=42,
-                                        cache_size=3000))
-                                   ])
+    pipe_rbf_knn_zs = Pipeline([('imputer', KNNImputer()),
+                               ('replacer', KNNReplacerZS()),
+                               ('scaler', StandardScaler()),
+                               ('classifier', SVC(kernel='rbf',
+                                                  decision_function_shape='ovo',
+                                                  random_state=42,
+                                                  cache_size=3000))
+                                ])
 
-    pipe_linear_mean_iqr = Pipeline([('imputer', SimpleImputer()),
-                                     ('replacer', MeanReplacerIQR()),
-                                     ('scaler', StandardScaler()),
-                                     ('classifier',
-                                      SVC(kernel='linear',
-                                          decision_function_shape='ovo',
-                                          random_state=42,
-                                          cache_size=3000))
-                                     ])
+    pipe_rbf_mean_iqr = Pipeline([('imputer', SimpleImputer()),
+                                  ('replacer', MeanReplacerIQR()),
+                                  ('scaler', StandardScaler()),
+                                  ('classifier',
+                                   SVC(kernel='rbf',
+                                       decision_function_shape='ovo',
+                                       random_state=42,
+                                       cache_size=3000))
+                                  ])
 
-    pipe_linear_mean_zs = Pipeline([('imputer', SimpleImputer()),
-                                    ('replacer', MeanReplacerZS()),
-                                    ('scaler', StandardScaler()),
-                                    ('classifier',
-                                     SVC(kernel='linear',
-                                         decision_function_shape='ovo',
-                                         random_state=42,
-                                         cache_size=3000))
-                                    ])
+    pipe_rbf_mean_zs = Pipeline([('imputer', SimpleImputer()),
+                                 ('replacer', MeanReplacerZS()),
+                                 ('scaler', StandardScaler()),
+                                 ('classifier',
+                                  SVC(kernel='rbf',
+                                      decision_function_shape='ovo',
+                                      random_state=42,
+                                      cache_size=3000))
+                                 ])
 
     # Set the parameters grids.
+    c_range_svc = [1, 1.5, 2, 2.5, 2.75, 3, 3.5, 5, 10]
+    gamma_range_svc = [0.03, 0.05, 0.07, 0.1, 0.5]
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
+    gamma_range_svc_log10 = 10. ** np.arange(-5, 4)
     c_range_svc_log2 = 2. ** np.arange(-5, 5)
+    gamma_range_svc_log2 = 2. ** np.arange(-3, 3)
 
-    grid_pipe_knn_lin = {'imputer__n_neighbors': [2, 5, 10],
+    grid_pipe_knn_rbf = {'imputer__n_neighbors': [2, 5, 10],
                          'replacer__n_neighbors': [2, 5, 10],
-                         'classifier__C': c_range_svc_log10,
+                         'classifier__C': c_range_svc_log2,
+                         'classifier__gamma': gamma_range_svc_log2,
                          'classifier__class_weight': [None, 'balanced']
                          }
 
-    grid_pipe_mean_lin = {'classifier__C': c_range_svc_log10,
+    grid_pipe_mean_rbf = {'classifier__C': c_range_svc_log2,
+                          'classifier__gamma': gamma_range_svc_log2,
                           'classifier__class_weight': [None, 'balanced']
                           }
 
     # Define grid searches for each pipeline.
-    gs_lin_knn_iqr = model_select.GridSearchCV(pipe_linear_knn_iqr,
-                                               param_grid=grid_pipe_knn_lin,
+    gs_rbf_knn_iqr = model_select.GridSearchCV(pipe_rbf_knn_iqr,
+                                               param_grid=grid_pipe_knn_rbf,
                                                scoring='f1_macro',
                                                cv=5,
                                                refit=True,
                                                n_jobs=-1)
 
-    gs_lin_knn_zs = model_select.GridSearchCV(pipe_linear_knn_zs,
-                                              param_grid=grid_pipe_knn_lin,
+    gs_rbf_knn_zs = model_select.GridSearchCV(pipe_rbf_knn_zs,
+                                              param_grid=grid_pipe_knn_rbf,
                                               scoring='f1_macro',
                                               cv=5,
                                               refit=True,
                                               n_jobs=-1)
 
-    gs_lin_mean_iqr = model_select.GridSearchCV(pipe_linear_mean_iqr,
-                                                param_grid=grid_pipe_mean_lin,
+    gs_rbf_mean_iqr = model_select.GridSearchCV(pipe_rbf_mean_iqr,
+                                                param_grid=grid_pipe_mean_rbf,
                                                 scoring='f1_macro',
                                                 cv=5,
                                                 refit=True,
                                                 n_jobs=-1)
 
-    gs_lin_mean_zs = model_select.GridSearchCV(pipe_linear_mean_zs,
-                                               param_grid=grid_pipe_mean_lin,
+    gs_rbf_mean_zs = model_select.GridSearchCV(pipe_rbf_mean_zs,
+                                               param_grid=grid_pipe_mean_rbf,
                                                scoring='f1_macro',
                                                cv=5,
                                                refit=True,
                                                n_jobs=-1)
 
     # List of pipeline grids for ease of iteration.
-    grids = [gs_lin_knn_iqr,
-             gs_lin_knn_zs,
-             gs_lin_mean_iqr,
-             gs_lin_mean_zs]
+    grids = [gs_rbf_knn_iqr,
+             gs_rbf_knn_zs,
+             gs_rbf_mean_iqr,
+             gs_rbf_mean_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
-    grid_dict_pipe = {0: 'SVM-LINEAR_KNN-IQR',
-                      1: 'SVM-LINEAR_KNN-ZS',
-                      2: 'SVM-LINEAR_MEAN-IQR',
-                      3: 'SVM-LINEAR_MEAN-ZS'}
+    grid_dict_pipe = {0: 'SVM-RBF_KNN-IQR',
+                      1: 'SVM-RBF_KNN-ZS',
+                      2: 'SVM-RBF_MEAN-IQR',
+                      3: 'SVM-RBF_MEAN-ZS'}
 
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
