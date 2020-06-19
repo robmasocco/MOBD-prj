@@ -94,22 +94,18 @@ def main():
                                                         n_jobs=-1))
                                 ])
 
-    grid_pipe_knn_rf = {'imputer__n_neighbors': [2, 5, 10],
-                        'replacer__n_neighbors': [2, 5, 10],
-                        'classifier__bootstrap': [True, False],
-                        'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                        'classifier__max_features': ['auto', 'sqrt'],
+    grid_pipe_knn_rf = {'imputer__n_neighbors': [2, 5],
+                        'replacer__n_neighbors': [2, 5],
+                        'classifier__max_depth': [10, 50, 100, None],
                         'classifier__min_samples_leaf': [1, 2, 4],
                         'classifier__min_samples_split': [2, 5, 10],
-                        'classifier__n_estimators': [100, 250, 500, 750, 1000]
+                        'classifier__n_estimators': [100, 500, 1000]
                         }
 
-    grid_pipe_mean_rf = {'classifier__bootstrap': [True, False],
-                         'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                         'classifier__max_features': ['auto', 'sqrt'],
+    grid_pipe_mean_rf = {'classifier__max_depth': [10, 50, 100, None],
                          'classifier__min_samples_leaf': [1, 2, 4],
                          'classifier__min_samples_split': [2, 5, 10],
-                         'classifier__n_estimators': [100, 250, 500, 750, 1000]
+                         'classifier__n_estimators': [100, 500, 1000]
                          }
 
     # Define grid searches for each pipeline.
@@ -142,10 +138,10 @@ def main():
                                               n_jobs=-1)
 
     # List of pipeline grids for ease of iteration.
-    grids = [gs_rf_knn_iqr]
-             #gs_rf_knn_zs,
-             #gs_rf_mean_iqr,
-             #gs_rf_mean_zs]
+    grids = [gs_rf_knn_iqr,
+             gs_rf_knn_zs,
+             gs_rf_mean_iqr,
+             gs_rf_mean_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
     grid_dict_pipe = {0: 'RAND-FOREST_KNN-IQR',
