@@ -3,7 +3,7 @@
     Project: MOBD-prj
     File: PipelineTraining.py
     Date created: 15/06/2020
-    Description: Script to training pipelines.
+    Description: Script to try pipelines.
 """
 
 import pickle
