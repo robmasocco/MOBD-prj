@@ -30,7 +30,6 @@ def show_histogram_features(data, feat_names, title):
     plt.show()
 
 
-# Displays confusion matrix with annotations.
 def show_confusion_matrix(cm, f1_score, title):
     """Displays confusion matrix with annotations."""
     # Create annotations label.
