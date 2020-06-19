@@ -1,59 +1,29 @@
 """
     Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: rbf_GridSearch.py
-    Date created: 19/06/2020
-    Description: Script to generate and save best classifier.
+    File: PipelineTraining.py
+    Date created: 15/06/2020
+    Description: Script to training pipelines.
 """
 
 import pickle
 
-from sklearn.impute import KNNImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
+
+from Bootcamp.SVM_linear_GridSearch import get_svm_linear_grids
+from Bootcamp.SVM_poly_GridSearch import get_svm_poly_grids
+from Bootcamp.SVM_rbf_GridSearch import get_svm_rbf_grids
+from Bootcamp.RandomForest_GridSearch import get_rf_grids
+from Bootcamp.KNN_GridSearch import get_knn_grids
+
+from DataEvaluation import evaluate_classifier
 
 from DataPreparation import *
 
 from DataVisualization import *
 
-from DataEvaluation import evaluate_classifier
-
-
 # Output data column.
 target = 'CLASS'
-
-
-class KNNReplacerIQR(KNNImputer):
-    """Pipeline-compliant KNNReplacer, based on IQR."""
-
-    def __init__(self, n_neighbors=5):
-        super().__init__(n_neighbors=n_neighbors)
-        self.lower_bound = None
-        self.upper_bound = None
-        self.imputer = KNNImputer(n_neighbors=n_neighbors)
-
-    def fit(self, x, y=None):
-        """Computes IQR bound and fits the imputer on the data."""
-        x = pd.DataFrame(x)
-        q1 = x.quantile(0.25)
-        q3 = x.quantile(0.75)
-        iqr = q3 - q1
-        self.lower_bound = q1 - (1.5 * iqr)
-        self.upper_bound = q3 + (1.5 * iqr)
-        self.imputer.fit(
-            x.where(~((x < self.lower_bound) | (x > self.upper_bound)), np.nan)
-        )
-        return self
-
-    def transform(self, x, y=None):
-        """Detects outliers and replaces them with the imputer."""
-        x = pd.DataFrame(x)
-        x.where(~((x < self.lower_bound) | (x > self.upper_bound)),
-                np.nan,
-                inplace=True)
-        return self.imputer.transform(x)
 
 
 def main():
@@ -61,7 +31,7 @@ def main():
     # Read dataset.
     dataset_path = '../Dataset/training_set.csv'
     dataset = pd.read_csv(dataset_path)
-    print("DATASET IMPORTED")
+    print("\nDATASET IMPORTED")
     print('\nDataset shape:', dataset.shape)
     print(dataset.describe())
     print('\nLast dataset entries:', dataset.tail())
@@ -85,38 +55,12 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # Define pipelines for preprocessing with SVMs (RBF kernel).
-    pipe_rbf_knn_iqr = Pipeline([('imputer', KNNImputer()),
-                                ('replacer', KNNReplacerIQR()),
-                                ('scaler', StandardScaler()),
-                                ('classifier',
-                                 SVC(kernel='rbf',
-                                     decision_function_shape='ovo',
-                                     random_state=42,
-                                     cache_size=3000))
-                                 ])
-
-    # Set the parameters grids.
-    grid_pipe_knn_rbf = {'imputer__n_neighbors': [2],
-                         'replacer__n_neighbors': [2],
-                         'classifier__C': [50],
-                         'classifier__gamma': [0.01],
-                         'classifier__class_weight': [None]
-                         }
-
-    # Define grid searches for each pipeline.
-    gs_rbf_knn_iqr = model_select.GridSearchCV(pipe_rbf_knn_iqr,
-                                               param_grid=grid_pipe_knn_rbf,
-                                               scoring='f1_macro',
-                                               cv=5,
-                                               refit=True,
-                                               n_jobs=-1)
-
-    # List of pipeline grids for ease of iteration.
-    grids = [gs_rbf_knn_iqr]
-
-    # Dictionary of pipelines and classifier types for ease of reference.
-    grid_dict_pipe = {0: 'SVM-RBF_KNN-IQR'}
+    # Define pipelines for processing data.
+    # grids, grids_dict = get_svm_linear_grids()
+    # grids, grids_dict = get_svm_poly_grids()
+    grids, grids_dict = get_svm_rbf_grids()
+    # grids, grids_dict = get_rf_grids()
+    # grids, grids_dict = get_knn_grids()
 
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
@@ -124,13 +68,13 @@ def main():
     best_idx = 0
     best_pipe = None
     for idx, pipe_gs in enumerate(grids):
-        print('Currently trying model: %s' % grid_dict_pipe[idx])
+        print('Currently trying model: %s' % grids_dict[idx])
 
         # Perform grid search.
         pipe_gs.fit(train_x, train_y[target])
 
         # Dump detailed scores on a file.
-        results_file = open(grid_dict_pipe[idx] + '_results.txt', 'w')
+        results_file = open(grids_dict[idx] + '_results.txt', 'w')
 
         # Print scores and update bests.
         print("\nGrid scores:")
@@ -154,7 +98,7 @@ def main():
         results_file.close()
 
     print('\nPipeline with best training set F1 macro score: %s'
-          % grid_dict_pipe[best_idx])
+          % grids_dict[best_idx])
 
     # Show information and plots about best preprocessing pipeline.
     data_preparation_info(train_x, features_list, best_pipe)

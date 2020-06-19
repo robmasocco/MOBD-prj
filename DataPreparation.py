@@ -1,7 +1,7 @@
 """
     Authors: Alessandro Tenaglia, Roberto Masocco
     Project: MOBD-prj
-    File: rbf_GridSearch.py
+    File: SVM_rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Auxiliary routines to generate descriptive data.
 """
