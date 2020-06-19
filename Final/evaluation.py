@@ -11,7 +11,7 @@ import pickle
 from aux_lib import *
 
 
-def main():
+def evaluation():
     """Evaluates our classifier on the test set."""
     # Load our classifier.
     with open('best_pipeline.sav', 'rb') as model_file:
@@ -31,4 +31,4 @@ def main():
 
 # Start the script.
 if __name__ == '__main__':
-    main()
+    evaluation()
