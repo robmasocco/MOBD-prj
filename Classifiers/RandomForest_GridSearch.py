@@ -4,7 +4,7 @@
     File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
-                 SVM with linear kernel.
+                 Random Forests.
 """
 
 import pickle
@@ -12,7 +12,6 @@ import pickle
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 import sklearn.model_selection as model_select
 
@@ -97,20 +96,20 @@ def main():
 
     grid_pipe_knn_rf = {'imputer__n_neighbors': [2, 5, 10],
                         'replacer__n_neighbors': [2, 5, 10],
-                        'bootstrap': [True, False],
-                        'max_depth': [10, 25, 50, 75, 100, None],
-                        'max_features': ['auto', 'sqrt'],
-                        'min_samples_leaf': [1, 2, 4],
-                        'min_samples_split': [2, 5, 10],
-                        'n_estimators': [100, 250, 500, 750, 1000]
+                        'classifier__bootstrap': [True, False],
+                        'classifier__max_depth': [10, 25, 50, 75, 100, None],
+                        'classifier__max_features': ['auto', 'sqrt'],
+                        'classifier__min_samples_leaf': [1, 2, 4],
+                        'classifier__min_samples_split': [2, 5, 10],
+                        'classifier__n_estimators': [100, 250, 500, 750, 1000]
                         }
 
     grid_pipe_mean_rf = {'bootstrap': [True, False],
-                         'max_depth': [10, 25, 50, 75, 100, None],
-                         'max_features': ['auto', 'sqrt'],
-                         'min_samples_leaf': [1, 2, 4],
-                         'min_samples_split': [2, 5, 10],
-                         'n_estimators': [100, 250, 500, 750, 1000]
+                         'classifier__max_depth': [10, 25, 50, 75, 100, None],
+                         'classifier__max_features': ['auto', 'sqrt'],
+                         'classifier__min_samples_leaf': [1, 2, 4],
+                         'classifier__min_samples_split': [2, 5, 10],
+                         'classifier__n_estimators': [100, 250, 500, 750, 1000]
                          }
 
     # Define grid searches for each pipeline.
