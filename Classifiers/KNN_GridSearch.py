@@ -4,12 +4,12 @@
     File: rbf_GridSearch.py
     Date created: 15/06/2020
     Description: Grid searches for best preprocessing pipeline and classifier.
-                 Random Forests.
+                 K Nearest Neighbors.
 """
 
 import pickle
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.impute import KNNImputer, SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -61,97 +61,85 @@ def main():
     show_classes_proportions(train_y, 'Training set classes proportions')
     show_classes_proportions(test_y, 'Test set classes proportions')
 
-    # Define pipelines for preprocessing with Random Forests.
-    pipe_rf_knn_iqr = Pipeline([('imputer', KNNImputer()),
-                                ('replacer', KNNReplacerIQR()),
-                                ('scaler', StandardScaler()),
-                                ('classifier',
-                                 RandomForestClassifier(random_state=42,
-                                                        n_jobs=-1))
-                                ])
-
-    pipe_rf_knn_zs = Pipeline([('imputer', KNNImputer()),
-                               ('replacer', KNNReplacerZS()),
-                               ('scaler', StandardScaler()),
-                               ('classifier',
-                                RandomForestClassifier(random_state=42,
-                                                       n_jobs=-1))
-                               ])
-
-    pipe_rf_mean_iqr = Pipeline([('imputer', SimpleImputer()),
-                                 ('replacer', MeanReplacerIQR()),
+    # Define pipelines for preprocessing with KNN.
+    pipe_knn_knn_iqr = Pipeline([('imputer', KNNImputer()),
+                                 ('replacer', KNNReplacerIQR()),
                                  ('scaler', StandardScaler()),
-                                 ('classifier',
-                                  RandomForestClassifier(random_state=42,
-                                                         n_jobs=-1))
+                                 ('classifier', KNeighborsClassifier(n_jobs=-1))
                                  ])
 
-    pipe_rf_mean_zs = Pipeline([('imputer', SimpleImputer()),
-                                ('replacer', MeanReplacerZS()),
+    pipe_knn_knn_zs = Pipeline([('imputer', KNNImputer()),
+                                ('replacer', KNNReplacerZS()),
                                 ('scaler', StandardScaler()),
-                                ('classifier',
-                                 RandomForestClassifier(random_state=42,
-                                                        n_jobs=-1))
+                                ('classifier', KNeighborsClassifier(n_jobs=-1))
                                 ])
 
-    grid_pipe_knn_rf = {'imputer__n_neighbors': [2, 5, 10],
-                        'replacer__n_neighbors': [2, 5, 10],
-                        'classifier__bootstrap': [True, False],
-                        'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                        'classifier__max_features': ['auto', 'sqrt'],
-                        'classifier__min_samples_leaf': [1, 2, 4],
-                        'classifier__min_samples_split': [2, 5, 10],
-                        'classifier__n_estimators': [100, 250, 500, 750, 1000]
-                        }
+    pipe_knn_mean_iqr = Pipeline([('imputer', SimpleImputer()),
+                                  ('replacer', MeanReplacerIQR()),
+                                  ('scaler', StandardScaler()),
+                                  ('classifier',
+                                   KNeighborsClassifier(n_jobs=-1))
+                                  ])
 
-    grid_pipe_mean_rf = {'classifier__bootstrap': [True, False],
-                         'classifier__max_depth': [10, 25, 50, 75, 100, None],
-                         'classifier__max_features': ['auto', 'sqrt'],
-                         'classifier__min_samples_leaf': [1, 2, 4],
-                         'classifier__min_samples_split': [2, 5, 10],
-                         'classifier__n_estimators': [100, 250, 500, 750, 1000]
+    pipe_knn_mean_zs = Pipeline([('imputer', SimpleImputer()),
+                                 ('replacer', MeanReplacerZS()),
+                                 ('scaler', StandardScaler()),
+                                 ('classifier', KNeighborsClassifier(n_jobs=-1))
+                                 ])
+
+    grid_pipe_knn_knn = {'imputer__n_neighbors': [2, 5, 10],
+                         'replacer__n_neighbors': [2, 5, 10],
+                         'classifier__n_neighbors': [2, 5, 10],
+                         'classifier__weights': ['uniform', 'distance'],
+                         'classifier__p': [1, 2]
                          }
 
+    grid_pipe_mean_knn = {'replacer__n_neighbors': [2, 5, 10],
+                          'classifier__n_neighbors': [2, 5, 10],
+                          'classifier__weights': ['uniform', 'distance'],
+                          'classifier__p': [1, 2]
+                          }
+
     # Define grid searches for each pipeline.
-    gs_rf_knn_iqr = model_select.GridSearchCV(pipe_rf_knn_iqr,
-                                              param_grid=grid_pipe_knn_rf,
-                                              scoring='f1_macro',
-                                              cv=5,
-                                              refit=True,
-                                              n_jobs=-1)
-
-    gs_rf_knn_zs = model_select.GridSearchCV(pipe_rf_knn_zs,
-                                             param_grid=grid_pipe_knn_rf,
-                                             scoring='f1_macro',
-                                             cv=5,
-                                             refit=True,
-                                             n_jobs=-1)
-
-    gs_rf_mean_iqr = model_select.GridSearchCV(pipe_rf_mean_iqr,
-                                               param_grid=grid_pipe_mean_rf,
+    gs_knn_knn_iqr = model_select.GridSearchCV(pipe_knn_knn_iqr,
+                                               param_grid=grid_pipe_knn_knn,
                                                scoring='f1_macro',
                                                cv=5,
                                                refit=True,
                                                n_jobs=-1)
 
-    gs_rf_mean_zs = model_select.GridSearchCV(pipe_rf_mean_zs,
-                                              param_grid=grid_pipe_mean_rf,
+    gs_knn_knn_zs = model_select.GridSearchCV(pipe_knn_knn_zs,
+                                              param_grid=grid_pipe_knn_knn,
                                               scoring='f1_macro',
                                               cv=5,
                                               refit=True,
                                               n_jobs=-1)
 
+    gs_knn_mean_iqr = model_select.GridSearchCV(pipe_knn_mean_iqr,
+                                                param_grid=grid_pipe_mean_knn,
+                                                scoring='f1_macro',
+                                                cv=5,
+                                                refit=True,
+                                                n_jobs=-1)
+
+    gs_knn_mean_zs = model_select.GridSearchCV(pipe_knn_mean_zs,
+                                               param_grid=grid_pipe_mean_knn,
+                                               scoring='f1_macro',
+                                               cv=5,
+                                               refit=True,
+                                               n_jobs=-1)
+
     # List of pipeline grids for ease of iteration.
-    grids = [gs_rf_knn_iqr]
-             #gs_rf_knn_zs,
-             #gs_rf_mean_iqr,
-             #gs_rf_mean_zs]
+    grids = [gs_knn_knn_iqr,
+             gs_knn_knn_zs,
+             gs_knn_mean_iqr,
+             gs_knn_mean_zs]
 
     # Dictionary of pipelines and classifier types for ease of reference.
-    grid_dict_pipe = {0: 'RAND-FOREST_KNN-IQR',
-                      1: 'RAND-FOREST_KNN-ZS',
-                      2: 'RAND-FOREST_MEAN-IQR',
-                      3: 'RAND-FOREST_MEAN-ZS'}
+    grid_dict_pipe = {0: 'KNN_KNN-IQR',
+                      1: 'KNN_KNN-ZS',
+                      2: 'KNN_MEAN-IQR',
+                      3: 'KNN_MEAN-ZS'}
 
     # Fit the grid search objects and look for the best model.
     print("\nMODEL OPTIMIZATIONS STARTED")
