@@ -1,0 +1,21 @@
+intro
+
+readme
+
+data understanding: describe, valori, grafico proporzioni dataset
+
+data preparation/preprocessing: come abbiamo splitatto e preparato il dataset
+intro con pipeline
+- split: 80:20, stratify, randomico predicibile con 42, grafici proporzioni training e test set
+- nan: due strategie, media e knn
+- outliers: detection con iqr/zs, sostituzione con le stesse strategie precedenti media e knn
+- rescaling con standard scaler, migliore (media nulla) dopo vari tentativi
+- grafici boxplot prima e dopo
+- feature selection fallita, grafico PCA
+- resampling fallito: oversampling causa overfitting, undersampling non dà grandi miglioramenti
+  a causa di perdità d'informazione.
+
+grid search cross-validation: elenco dei classificatori con le griglie testate e migliori parametri/score
+per ognuno
+
+conclusione: pipeline migliore, matrice di confusione/score sul test set finale
