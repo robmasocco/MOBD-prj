@@ -1,0 +1,53 @@
+0.1259 (+/-0.000) for {'classifier__C': 0.001, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.1259 (+/-0.000) for {'classifier__C': 0.001, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.1259 (+/-0.000) for {'classifier__C': 0.001, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.1259 (+/-0.000) for {'classifier__C': 0.001, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.0972 (+/-0.028) for {'classifier__C': 0.001, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.0972 (+/-0.028) for {'classifier__C': 0.001, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.0972 (+/-0.028) for {'classifier__C': 0.001, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.0973 (+/-0.028) for {'classifier__C': 0.001, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+0.2768 (+/-0.009) for {'classifier__C': 0.01, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.3194 (+/-0.021) for {'classifier__C': 0.01, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.1494 (+/-0.011) for {'classifier__C': 0.01, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.2145 (+/-0.026) for {'classifier__C': 0.01, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.4759 (+/-0.026) for {'classifier__C': 0.01, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.6229 (+/-0.028) for {'classifier__C': 0.01, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.4706 (+/-0.024) for {'classifier__C': 0.01, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.4305 (+/-0.029) for {'classifier__C': 0.01, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+0.4873 (+/-0.028) for {'classifier__C': 0.1, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.6589 (+/-0.015) for {'classifier__C': 0.1, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.4437 (+/-0.029) for {'classifier__C': 0.1, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.5642 (+/-0.031) for {'classifier__C': 0.1, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.5192 (+/-0.033) for {'classifier__C': 0.1, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.7224 (+/-0.030) for {'classifier__C': 0.1, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.5800 (+/-0.031) for {'classifier__C': 0.1, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.6306 (+/-0.017) for {'classifier__C': 0.1, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+0.5024 (+/-0.028) for {'classifier__C': 1.0, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.7544 (+/-0.024) for {'classifier__C': 1.0, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.5631 (+/-0.035) for {'classifier__C': 1.0, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.6646 (+/-0.030) for {'classifier__C': 1.0, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.5337 (+/-0.034) for {'classifier__C': 1.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.7707 (+/-0.022) for {'classifier__C': 1.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.6118 (+/-0.033) for {'classifier__C': 1.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.7013 (+/-0.031) for {'classifier__C': 1.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+0.5045 (+/-0.034) for {'classifier__C': 10.0, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.7722 (+/-0.032) for {'classifier__C': 10.0, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.5982 (+/-0.026) for {'classifier__C': 10.0, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.6843 (+/-0.025) for {'classifier__C': 10.0, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.5313 (+/-0.035) for {'classifier__C': 10.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.7750 (+/-0.034) for {'classifier__C': 10.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.5953 (+/-0.036) for {'classifier__C': 10.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.6964 (+/-0.019) for {'classifier__C': 10.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+0.5048 (+/-0.035) for {'classifier__C': 100.0, 'classifier__class_weight': None, 'classifier__degree': 1}
+0.7742 (+/-0.032) for {'classifier__C': 100.0, 'classifier__class_weight': None, 'classifier__degree': 2}
+0.5794 (+/-0.020) for {'classifier__C': 100.0, 'classifier__class_weight': None, 'classifier__degree': 3}
+0.6601 (+/-0.026) for {'classifier__C': 100.0, 'classifier__class_weight': None, 'classifier__degree': 4}
+0.5318 (+/-0.036) for {'classifier__C': 100.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 1}
+0.7751 (+/-0.035) for {'classifier__C': 100.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+0.5740 (+/-0.021) for {'classifier__C': 100.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 3}
+0.6611 (+/-0.016) for {'classifier__C': 100.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 4}
+
+Best parameters:
+{'classifier__C': 100.0, 'classifier__class_weight': 'balanced', 'classifier__degree': 2}
+
+Best score: 0.7751

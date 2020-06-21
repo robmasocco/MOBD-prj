@@ -1,0 +1,11 @@
+Best score: 0.7335
+
+Pipeline with best training set F1 macro score: KNN_KNN-IQR
+
+Test set F1 macro: 0.7513
+
+RE-FITTING BEST PIPELINE ON WHOLE DATASET
+
+(Pre-save) Dataset F1 macro: 1.0000
+
+(Post-save) Dataset F1 macro: 1.0000

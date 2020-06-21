@@ -1,0 +1,17 @@
+0.3672 (+/-0.019) for {'classifier__C': 0.001, 'classifier__class_weight': None}
+0.4913 (+/-0.028) for {'classifier__C': 0.001, 'classifier__class_weight': 'balanced'}
+0.4917 (+/-0.030) for {'classifier__C': 0.01, 'classifier__class_weight': None}
+0.5278 (+/-0.036) for {'classifier__C': 0.01, 'classifier__class_weight': 'balanced'}
+0.5047 (+/-0.032) for {'classifier__C': 0.1, 'classifier__class_weight': None}
+0.5310 (+/-0.035) for {'classifier__C': 0.1, 'classifier__class_weight': 'balanced'}
+0.5039 (+/-0.035) for {'classifier__C': 1.0, 'classifier__class_weight': None}
+0.5317 (+/-0.036) for {'classifier__C': 1.0, 'classifier__class_weight': 'balanced'}
+0.5053 (+/-0.036) for {'classifier__C': 10.0, 'classifier__class_weight': None}
+0.5318 (+/-0.035) for {'classifier__C': 10.0, 'classifier__class_weight': 'balanced'}
+0.5064 (+/-0.036) for {'classifier__C': 100.0, 'classifier__class_weight': None}
+0.5318 (+/-0.036) for {'classifier__C': 100.0, 'classifier__class_weight': 'balanced'}
+
+Best parameters:
+{'classifier__C': 10.0, 'classifier__class_weight': 'balanced'}
+
+Best score: 0.5318

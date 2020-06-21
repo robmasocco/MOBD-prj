@@ -1,0 +1,7 @@
+Test set F1 macro: 0.8197
+
+RE-FITTING BEST PIPELINE ON WHOLE DATASET
+
+(Pre-save) Dataset F1 macro: 0.8766
+
+(Post-save) Dataset F1 macro: 0.8766

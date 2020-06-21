@@ -1,0 +1,17 @@
+0.6104 (+/-0.018) for {'classifier__n_neighbors': 2, 'classifier__p': 1, 'classifier__weights': 'uniform'}
+0.6291 (+/-0.025) for {'classifier__n_neighbors': 2, 'classifier__p': 1, 'classifier__weights': 'distance'}
+0.6046 (+/-0.018) for {'classifier__n_neighbors': 2, 'classifier__p': 2, 'classifier__weights': 'uniform'}
+0.6260 (+/-0.017) for {'classifier__n_neighbors': 2, 'classifier__p': 2, 'classifier__weights': 'distance'}
+0.7102 (+/-0.020) for {'classifier__n_neighbors': 5, 'classifier__p': 1, 'classifier__weights': 'uniform'}
+0.7109 (+/-0.027) for {'classifier__n_neighbors': 5, 'classifier__p': 1, 'classifier__weights': 'distance'}
+0.7084 (+/-0.022) for {'classifier__n_neighbors': 5, 'classifier__p': 2, 'classifier__weights': 'uniform'}
+0.7141 (+/-0.011) for {'classifier__n_neighbors': 5, 'classifier__p': 2, 'classifier__weights': 'distance'}
+0.7303 (+/-0.010) for {'classifier__n_neighbors': 10, 'classifier__p': 1, 'classifier__weights': 'uniform'}
+0.7327 (+/-0.019) for {'classifier__n_neighbors': 10, 'classifier__p': 1, 'classifier__weights': 'distance'}
+0.7306 (+/-0.016) for {'classifier__n_neighbors': 10, 'classifier__p': 2, 'classifier__weights': 'uniform'}
+0.7335 (+/-0.014) for {'classifier__n_neighbors': 10, 'classifier__p': 2, 'classifier__weights': 'distance'}
+
+Best parameters:
+{'classifier__n_neighbors': 10, 'classifier__p': 2, 'classifier__weights': 'distance'}
+
+Best score: 0.7335
