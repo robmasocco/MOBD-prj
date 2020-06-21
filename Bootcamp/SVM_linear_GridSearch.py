@@ -70,7 +70,6 @@ def get_svm_linear_grids():
 
     # Set the parameters grids.
     c_range_svc_log10 = 10. ** np.arange(-3, 3)
-    c_range_svc_log2 = 2. ** np.arange(-5, 5)
 
     grid_pipe_knn_lin = {'imputer__n_neighbors': [2, 5, 10],
                          'replacer__n_neighbors': [2, 5, 10],
